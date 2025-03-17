@@ -7,18 +7,27 @@ import "fmt"
  *************************************************/
 
 // OnInit 在Init时回调
-func OnInit(hook ...func(root ...map[string]any)) {
-
+func OnInit(name string, call func(config *ConfigToml)) {
+	OnInitHook = append(OnInitHook, &Hook{
+		Name: name,
+		Call: call,
+	})
 }
 
 // OnReload 在Reload时回调
-func OnReload(hook ...func(root ...map[string]any)) {
-
+func OnReload(name string, call func(config *ConfigToml)) {
+	OnReloadHook = append(OnReloadHook, &Hook{
+		Name: name,
+		Call: call,
+	})
 }
 
 // OnExit 在Exit时回调
-func OnExit(hook ...func(root ...map[string]any)) {
-
+func OnExit(name string, call func(config *ConfigToml)) {
+	OnExitHook = append(OnExitHook, &Hook{
+		Name: name,
+		Call: call,
+	})
 }
 
 /*************************************************
@@ -26,13 +35,13 @@ func OnExit(hook ...func(root ...map[string]any)) {
  *************************************************/
 
 // Register 注册组件工厂, 重复注册会panic!
-func Register(kind string, factory ComponentFactory) {
-	_container.MustRegisterFactory(kind, factory)
+func Register(kind string, factory ManagedFactory) {
+	_managed.MustRegisterFactory(kind, factory)
 }
 
-// Component 断言组件实例, 若无kind工厂会panic!
-func Component[T any](kind, name string) T {
-	return *new(T)
+// Resource 断言组件实例, 若无kind工厂会panic!
+func Resource[T any](kind, name string) T {
+	return _managed.MustRetrieveFactory(kind).GetOrNewComponent(name).(T)
 }
 
 /*************************************************
@@ -40,28 +49,55 @@ func Component[T any](kind, name string) T {
  *************************************************/
 
 func Init() {
-	// 1. 初始toml配置
+	// 0. 初始配置
 	if err := _configToml.InitTomlFile(ConfigTomlFile()); err != nil {
 		panic(fmt.Errorf("init toml file error: %v", err))
 	}
+	// 1. 回调钩子
+	for _, hook := range OnInitHook {
+		hook.Exec(&_configToml)
+	}
+	// 2. 加载托管
+	_managed.MustInit(_configToml)
 }
 
 func InitData(datas ...[]byte) {
-	// 1. 初始toml配置
+	// 0. 初始配置
 	if err := _configToml.InitTomlData(datas, nil); err != nil {
 		panic(fmt.Errorf("init toml data error: %v", err))
+	}
+	// 1. 回调钩子
+	for _, hook := range OnInitHook {
+		hook.Exec(&_configToml)
+	}
+}
+
+func Reload() error {
+	// 0. 初始配置
+	if err := _configToml.InitTomlFile(ConfigTomlFile()); err != nil {
+		panic(fmt.Errorf("init toml file error: %v", err))
+	}
+	// 1. 回调钩子
+	for _, hook := range OnReloadHook {
+		hook.Exec(&_configToml)
 	}
 
 }
 
-func Reload() error {
-	return nil
-}
-
-func ReloadConfig(root ...map[string]any) {
-
+func ReloadData(datas ...[]byte) {
+	// 0. 初始配置
+	if err := _configToml.InitTomlData(datas, nil); err != nil {
+		panic(fmt.Errorf("init toml data error: %v", err))
+	}
+	// 1. 回调钩子
+	for _, hook := range OnReloadHook {
+		hook.Exec(&_configToml)
+	}
 }
 
 func Exit(hints ...func(kind, name string, err error)) {
-
+	// 1. 回调钩子
+	for _, hook := range OnExitHook {
+		hook.Exec(&_configToml)
+	}
 }
