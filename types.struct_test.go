@@ -30,7 +30,10 @@ var mdata = map[string]interface{}{
 	"score":  113.5,
 	"female": true,
 	"secret": "测试数据",
-	"class":  nil,
+	"class": map[string]interface{}{
+		"name": "三班",
+		"code": "sanban",
+	},
 	"parent": []interface{}{ // 注意: 泛型slice是[]interface{}
 		map[string]interface{}{
 			"name": "baba",
