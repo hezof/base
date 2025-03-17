@@ -7,20 +7,21 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"text/template"
 )
 
 // 默认配置对象
 var (
-	_configToml   = ConfigToml{Plugin: _configPlugin}
-	_configPlugin = new(EnvironConfigPlugin)
+	_configContext = &ConfigContext{Plugin: _configPlugin}
+	_configPlugin  = new(EnvironConfigPlugin)
 )
 
 func SetConfigPlugin(plugin ConfigPlugin) {
 	if plugin != nil {
-		_configToml.Plugin = plugin
+		_configContext.Plugin = plugin
 	} else {
-		_configToml.Plugin = _configPlugin
+		_configContext.Plugin = _configPlugin
 	}
 }
 
@@ -33,55 +34,36 @@ type ConfigPlugin interface {
 	Exec(data []byte) ([]byte, error)
 }
 
-// ConfigToml 配置结构
-type ConfigToml struct {
+// ConfigContext 配置结构
+type ConfigContext struct {
+	sync.RWMutex
 	Plugin ConfigPlugin
 	Values []map[string]any
 }
 
-func (c *ConfigToml) InitTomlFile(files []string, err error) error {
-	if err != nil {
-		return err
-	}
-	var data []byte
-	for _, file := range files {
-		if data, err = os.ReadFile(file); err != nil {
-			return err
-		}
-		if err = c.Put(data); err != nil {
-			return err
-		}
-	}
-	return nil
-}
+func (c *ConfigContext) SetTomlData(datas ...[]byte) (err error) {
+	c.Lock()
+	defer c.Unlock()
 
-func (c *ConfigToml) InitTomlData(datas [][]byte, err error) error {
-	if err != nil {
-		return err
-	}
 	for _, data := range datas {
-		if err = c.Put(data); err != nil {
+		if c.Plugin != nil {
+			if data, err = c.Plugin.Exec(data); err != nil {
+				return err
+			}
+		}
+		value := make(map[string]any)
+		if err = toml.Unmarshal(data, &value); err != nil {
 			return err
 		}
+		c.Values = append(c.Values, value)
 	}
 	return nil
 }
 
-func (c *ConfigToml) Put(data []byte) (err error) {
-	if c.Plugin != nil {
-		if data, err = c.Plugin.Exec(data); err != nil {
-			return err
-		}
-	}
-	value := make(map[string]any)
-	if err = toml.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	c.Values = append(c.Values, value)
-	return nil
-}
+func (c *ConfigContext) GetFirst(path string) (any, bool) {
+	c.RLock()
+	defer c.RUnlock()
 
-func (c *ConfigToml) GetFirst(path string) (any, bool) {
 	for _, value := range c.Values {
 		val, ok := ExtractConfig(value, path)
 		if ok {
@@ -91,7 +73,10 @@ func (c *ConfigToml) GetFirst(path string) (any, bool) {
 	return nil, false
 }
 
-func (c *ConfigToml) GetLast(path string) (any, bool) {
+func (c *ConfigContext) GetLast(path string) (any, bool) {
+	c.RLock()
+	defer c.RUnlock()
+
 	for i := len(c.Values) - 1; i >= 0; i-- {
 		val, ok := ExtractConfig(c.Values[i], path)
 		if ok {
@@ -101,7 +86,10 @@ func (c *ConfigToml) GetLast(path string) (any, bool) {
 	return nil, false
 }
 
-func (c *ConfigToml) GetAll(path string) []any {
+func (c *ConfigContext) GetAll(path string) []any {
+	c.RLock()
+	defer c.RUnlock()
+
 	var all []any
 	for _, value := range c.Values {
 		val, ok := ExtractConfig(value, path)

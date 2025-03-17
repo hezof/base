@@ -44,40 +44,6 @@ type FactoryWrapper struct {
 	Target       []*TargetWrapper            // 具体实例. 键为配置中[kind.name]定义的name
 }
 
-// ManagedContext 托管容器
-type ManagedContext struct {
-	sync.RWMutex                            // 读写锁
-	Factory      map[string]*FactoryWrapper // 注册工厂. 键是kind, 值是托管工厂
-	Indexes      []string                   // 注册顺序, 决定Init()/Exit()的组件顺序
-}
-
-func (fc *ManagedContext) MustRegisterFactory(kind string, factory ManagedFactory) {
-	fc.Lock()
-	defer fc.Unlock()
-
-	ft, ok := fc.Factory[kind]
-	if ok {
-		panic(fmt.Errorf("factory existed %v(%T)", kind, ft))
-	}
-	fc.Indexes = append(fc.Indexes, kind)
-	fc.Factory[kind] = &FactoryWrapper{
-		Factory: factory,
-		Manage:  make(map[string]ManagedComponent),
-		Target:  make([]*TargetWrapper, 0, 4),
-	}
-}
-
-func (fc *ManagedContext) MustRetrieveFactory(kind string) *FactoryWrapper {
-	fc.RLock()
-	defer fc.RUnlock()
-
-	ft, ok := fc.Factory[kind]
-	if !ok {
-		panic(fmt.Errorf("factory unknown %v", kind))
-	}
-	return ft
-}
-
 func (fw *FactoryWrapper) GetOrNewComponent(name string) ManagedComponent {
 	fw.RLock()
 	mc, ok := fw.Manage[name]
@@ -94,20 +60,51 @@ func (fw *FactoryWrapper) GetOrNewComponent(name string) ManagedComponent {
 	return mc
 }
 
-func (mc *ManagedContainer) MustInit(root ...ConfigToml) {
-
+// ManagedContext 托管容器
+type ManagedContext struct {
+	sync.RWMutex                            // 读写锁
+	Factory      map[string]*FactoryWrapper // 注册工厂. 键是kind, 值是托管工厂
+	Indexes      []string                   // 注册顺序, 决定Init()/Exit()的组件顺序
 }
 
-func (mc *ManagedContainer) Reload(root ...ConfigToml) error {
+func (mc *ManagedContext) RegisterFactory(kind string, factory ManagedFactory) error {
+	mc.Lock()
+	defer mc.Unlock()
+
+	ft, ok := mc.Factory[kind]
+	if ok {
+		return fmt.Errorf("factory existed %v(%T)", kind, ft)
+	}
+	mc.Indexes = append(mc.Indexes, kind)
+	mc.Factory[kind] = &FactoryWrapper{
+		Factory: factory,
+		Manage:  make(map[string]ManagedComponent),
+		Target:  make([]*TargetWrapper, 0, 4),
+	}
 	return nil
 }
 
-func (mc *ManagedContainer) Exit(hints ...func(kind, name string, err error)) {
+func (mc *ManagedContext) RetrieveFactory(kind string) *FactoryWrapper {
+	mc.RLock()
+	defer mc.RUnlock()
+
+	return mc.Factory[kind]
+}
+
+func (mc *ManagedContext) Init(config *ConfigContext) error {
+
+}
+
+func (mc *ManagedContext) Reload(config *ConfigContext) error {
+	return nil
+}
+
+func (mc *ManagedContext) Exit(hints ...func(kind, name string, err error)) {
 
 }
 
 // _managed 内部托管容器
-var _managed = &ManagedContext{
+var _managedContext = &ManagedContext{
 	Factory: make(map[string]*FactoryWrapper),
 	Indexes: make([]string, 0, 16),
 }

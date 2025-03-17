@@ -284,3 +284,17 @@ func IsSpace(b byte) bool {
 	}
 	return false
 }
+
+func ReadFile(files []string, err error) ([][]byte, error) {
+	if err != nil {
+		return nil, err
+	}
+	datas := make([][]byte, len(files))
+	for i, file := range files {
+		datas[i], err = os.ReadFile(file)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return datas, nil
+}
