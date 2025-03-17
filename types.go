@@ -3,7 +3,9 @@ package core
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
+	"unsafe"
 )
 
 /************************************************
@@ -64,10 +66,36 @@ func AsBool(val any) (bool, error) {
 	}
 }
 
+const (
+	LayoutDateTime       = "2006-01-02 15:04:05"
+	LayoutDateTimeT      = "2006-01-02T15:04:05"
+	LayoutDateTimeLength = len(LayoutDateTime)
+)
+
+func DateTime(ds string) (time.Time, error) {
+	t := strings.IndexByte(ds, 'T')
+	n := len(ds)
+	switch {
+	case t == -1 && n == LayoutDateTimeLength:
+		return time.ParseInLocation(ds, LayoutDateTime, time.Local)
+	case t == -1 && n < LayoutDateTimeLength:
+		return time.ParseInLocation(ds, LayoutDateTime[:n], time.Local)
+	case t == -1 && n > LayoutDateTimeLength:
+		return time.ParseInLocation(ds[:n], LayoutDateTime, time.Local)
+	case t != -1 && n == LayoutDateTimeLength:
+		return time.ParseInLocation(ds, LayoutDateTimeT, time.Local)
+	case t != -1 && n < LayoutDateTimeLength:
+		return time.ParseInLocation(ds, LayoutDateTimeT[:n], time.Local)
+	case t != -1 && n > LayoutDateTimeLength:
+		return time.ParseInLocation(ds[:n], LayoutDateTimeT, time.Local)
+	}
+	return ZeroTime, fmt.Errorf("invalid datetime format %v", ds)
+}
+
 func AsTime(val any) (time.Time, error) {
 	switch val := val.(type) {
 	case string:
-		return time.ParseInLocation(val, time.DateTime, time.Local)
+		return DateTime(val)
 	case int:
 		return time.Unix(int64(val), 0), nil
 	case int8:
@@ -663,6 +691,77 @@ func AsFloat64(val any) (float64, error) {
 		return 0, nil
 	default:
 		return 0, fmt.Errorf("can't convert from type %T to float64", val)
+	}
+}
+
+func AsUintptr(val any) (uintptr, error) {
+	switch val := val.(type) {
+	case uintptr:
+		return val, nil
+	case unsafe.Pointer:
+		return uintptr(val), nil
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("can't convert from type %T to uintptr", val)
+	}
+}
+
+func AsUnsafePointer(val any) (unsafe.Pointer, error) {
+	switch val := val.(type) {
+	case uintptr:
+		return unsafe.Pointer(val), nil
+	case unsafe.Pointer:
+		return val, nil
+	case nil:
+		return nil, nil
+	default:
+		return nil, fmt.Errorf("can't convert from type %T to unsafe.Pointer", val)
+	}
+}
+
+func AsComplex128(val any) (complex128, error) {
+	switch val := val.(type) {
+	case complex128:
+		return val, nil
+	case complex64:
+		return complex128(val), nil
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("can't convert from type %T to unsafe.Pointer", val)
+	}
+}
+
+func AsBytes(val any) ([]byte, error) {
+	switch val := val.(type) {
+	case []byte:
+		return val, nil
+	case string:
+		return []byte(val), nil
+	case nil:
+		return nil, nil
+	default:
+		return nil, fmt.Errorf("can't convert from type %T to []byte", val)
+	}
+}
+
+func AsRunes(val any) ([]rune, error) {
+	switch val := val.(type) {
+	case []rune:
+		return val, nil
+	case []byte:
+		ret := make([]rune, len(val))
+		for i, v := range val {
+			ret[i] = rune(v)
+		}
+		return ret, nil
+	case string:
+		return []rune(val), nil
+	case nil:
+		return nil, nil
+	default:
+		return nil, fmt.Errorf("can't convert from type %T to []rune", val)
 	}
 }
 

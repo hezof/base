@@ -12,13 +12,13 @@ type ComponentConfig struct {
 	Value map[string]any // 配置值
 }
 
-// Native 具体组件
-type Native = interface{}
+// NativeComponent 具体组件
+type NativeComponent = interface{}
 
 // ManagedComponent 托管组件接口
 type ManagedComponent interface {
 	// Bind 托管实例绑定具体实例
-	Bind(native Native)
+	Bind(native NativeComponent)
 }
 
 // ComponentFactory 组件工厂接口
@@ -26,27 +26,27 @@ type ComponentFactory interface {
 	// Manage 创建托管实例
 	Manage() ManagedComponent
 	// Native 创建具体实例
-	Native(c ConfigToml) (Native, error)
+	Native(c ConfigToml) (NativeComponent, error)
 	// Destroy 销毁具体实例
-	Destroy(v Native) error
+	Destroy(v NativeComponent) error
 }
 
 // ConfigNative 带配置的具体实例
 type ConfigNative struct {
-	Config ConfigToml // 配置
-	Native Native     // 实例
+	Config ConfigToml      // 配置
+	Native NativeComponent // 实例
 }
 
 // ManagedFactory 托管工厂
 type ManagedFactory struct {
-	sync.RWMutex                    // 读写锁
-	Kind         string             // 类型
-	Factory      Factory            // 工厂
-	Manage       map[string]Managed // 托管实例. 键为Resource(name)声明的name
-	Native       []*ConfigNative    // 具体实例. 键为配置中[kind.name]定义的name
+	sync.RWMutex                             // 读写锁
+	Kind         string                      // 类型
+	Factory      ComponentFactory            // 工厂
+	Manage       map[string]ManagedComponent // 托管实例. 键为Resource(name)声明的name
+	Native       []*ConfigNative             // 具体实例. 键为配置中[kind.name]定义的name
 }
 
-func (mf *ManagedFactory) GetOrNewManaged(name string) Managed {
+func (mf *ManagedFactory) GetOrNewManaged(name string) ManagedComponent {
 	mf.RLock()
 	rt, ok := mf.Manage[name]
 	mf.RUnlock()
@@ -69,7 +69,7 @@ type ManagedContainer struct {
 	Indexes      []string                   // 注册顺序, 决定Init()/Exit()的组件顺序
 }
 
-func (mc *ManagedContainer) MustRegisterFactory(kind string, factory Factory) {
+func (mc *ManagedContainer) MustRegisterFactory(kind string, factory ComponentFactory) {
 	mc.Lock()
 	defer mc.Unlock()
 
@@ -80,7 +80,7 @@ func (mc *ManagedContainer) MustRegisterFactory(kind string, factory Factory) {
 	mc.Indexes = append(_container.Indexes, kind)
 	mc.Factory[kind] = &ManagedFactory{
 		Factory: factory,
-		Manage:  make(map[string]Managed),
+		Manage:  make(map[string]ManagedComponent),
 		Native:  make([]*ConfigNative, 0, 4),
 	}
 }
@@ -97,26 +97,11 @@ func (mc *ManagedContainer) MustGetFactory(kind string) *ManagedFactory {
 }
 
 func (mc *ManagedContainer) MustInit(root ...ConfigToml) {
-	/* 初始逻辑: 根据factory的注册顺序.
-	1. 根据kind获取factory
-	2. 根据kind获取root(多个), 并检查是否有冲突! 若有冲突, 进入销毁流程.
-	3. 根据root(多个), 创建Native, 并绑到同名Managed, 若Managed已存在, 则不再创建!
-	4. 检查Managed, 是否有Native绑定! 若无绑定, 进入销毁流程.
-	*/
-	for _, kind := range mc.Indexes {
-		factory := mc.Factory[kind]
-		configs := ExtractConfig(kind, root...)
-		if len(conflict) > 0 {
-			panic(fmt.Errorf("configs conflict %v.%v", kind, Keys(conflict)))
-		}
-		for name, config := range configs {
 
-		}
-	}
 }
 
 func (mc *ManagedContainer) Reload(root ...ConfigToml) error {
-
+	return nil
 }
 
 func (mc *ManagedContainer) Exit(hints ...func(kind, name string, err error)) {
