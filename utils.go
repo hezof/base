@@ -208,3 +208,79 @@ func HmacSha256(key []byte, val []byte) []byte {
 	h.Write(val)
 	return h.Sum(nil)
 }
+
+// AllTag 实现tag解析: key:"v1,v2,...", 提取key:v1即可
+func AllTag(str string) map[string]string {
+	ret := make(map[string]string)
+_ITER:
+	for i, n := 0, len(str); i < n; i++ {
+		// 查找非空白
+		for IsSpace(str[i]) {
+			if i++; i >= n {
+				break _ITER
+			}
+		}
+		mark := i
+
+		// 查找冒号
+		for str[i] != ':' {
+			if i++; i >= n {
+				break _ITER
+			}
+		}
+		end := i - 1
+		for IsSpace(str[end]) {
+			if end--; end == mark {
+				break
+			}
+		}
+		key := str[mark : end+1]
+
+		// 查找左引号
+		for str[i] != '"' && str[i] != '`' {
+			if i++; i >= n {
+				break _ITER
+			}
+		}
+		i++ // 引号下位
+		mark = i
+
+		// 查找右引号
+		for str[i] != '"' && str[i] != '`' {
+			if i++; i >= n {
+				break _ITER
+			}
+		}
+		end = i
+
+		// 解析a,b,c里面的a
+		pos := mark
+		for pos < end && str[pos] != ',' {
+			pos++
+		}
+		val := str[mark:pos]
+		ret[key] = val
+	}
+	return ret
+}
+func IsSpace(b byte) bool {
+	switch b {
+	case '\t':
+		return true
+	case '\n':
+		return true
+	case '\v':
+		return true
+	case '\f':
+		return true
+	case '\r':
+		return true
+	case ' ':
+		return true
+	case 0x85:
+		return true
+	case 0xA0:
+		return true
+	}
+	return false
+}

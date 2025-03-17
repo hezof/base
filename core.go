@@ -32,7 +32,7 @@ func Register(kind string, factory ComponentFactory) {
 
 // Component 断言组件实例, 若无kind工厂会panic!
 func Component[T any](kind, name string) T {
-
+	return *new(T)
 }
 
 /*************************************************
@@ -55,7 +55,7 @@ func InitData(datas ...[]byte) {
 }
 
 func Reload() error {
-
+	return nil
 }
 
 func ReloadConfig(root ...map[string]any) {

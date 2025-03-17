@@ -1,28 +1,27 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 )
 
 type Person struct {
-	Name   string  `json:"name"`
-	Age    int     `json:"age"`
-	Score  float32 `json:"score"`
-	Female bool    `json:"female"`
-	Secret []byte  `json:"secret"`
+	Name   string  `json:"name,omitempty"`
+	Age    int     `json:"age,omitempty"`
+	Score  float32 `json:"score,omitempty"`
+	Female bool    `json:"female,omitempty"`
+	Secret []byte  `json:"secret,omitempty"`
 }
 
 type Class struct {
-	Name string `json:"name"`
-	Code string `json:"code"`
+	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
 }
 
 type Student struct {
 	*Person
-	Class  *Class    `json:"class"`
-	Parent []*Person `json:"parent"`
+	Class  *Class    `json:"class,omitempty"`
+	Parent []*Person `json:"parent,omitempty"`
 }
 
 var mdata = map[string]interface{}{
@@ -31,10 +30,7 @@ var mdata = map[string]interface{}{
 	"score":  113.5,
 	"female": true,
 	"secret": "测试数据",
-	"class": map[string]interface{}{
-		"name": "三班",
-		"code": "sanban",
-	},
+	"class":  nil,
 	"parent": []interface{}{ // 注意: 泛型slice是[]interface{}
 		map[string]interface{}{
 			"name": "baba",
@@ -46,11 +42,14 @@ var mdata = map[string]interface{}{
 }
 
 func TestMapStruct(t *testing.T) {
+
+	fmt.Println(ToJson(mdata))
 	var stu *Student
 	err := MapStruct(mdata, &stu, "json")
 	if err != nil {
 		panic(err)
 	}
-	data, _ := json.Marshal(stu)
-	fmt.Printf("Data: %s\n", data)
+	fmt.Println(ToJson(stu))
+	bs, _ := UnBase64("5rWL6K+V5pWw5o2u")
+	fmt.Println(string(bs))
 }

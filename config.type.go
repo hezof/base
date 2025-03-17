@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+func ConfigStruct(path string, structPointer any, tag string) {
+
+}
+
 /**************************************************
  * 通用配置
  **************************************************/
