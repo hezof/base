@@ -25,69 +25,55 @@ const (
 	StatusMask = 1<<StatusBits - 1
 )
 
-// StatusResult 带状态码的错误
-type StatusResult interface {
+// Error 带状态码的错误
+type Error interface {
 	error
 	GetCode() uint32
-	SetStatus(status uint32)
 	GetStatus() uint32
-	SetName(name string)
 	GetName() string
-	SetMessage(message string)
 	GetMessage() string
+	GetDetails() []string
 }
 
-// SimpleResult 带状态的结果. 必须注意status与code的约定取值范围!
-type SimpleResult struct {
+// ErrorModel 带状态的结果. 必须注意status与code的约定取值范围!
+type ErrorModel struct {
 	Status  uint32   // 状态代码(http).
 	Code    uint32   // 错误代码. 0表示成功
 	Name    string   // 错误名称. OK表示成功
 	Message string   // 错误消息.
 	Details []string `json:"-"` // 错误参数.
-	Data    any      `json:"-"` // 结果数据
 }
 
-func (sr *SimpleResult) Error() string {
+func (sr *ErrorModel) Error() string {
 	return ToJson(sr)
 }
 
-func (sr *SimpleResult) GetCode() uint32 {
+func (sr *ErrorModel) GetCode() uint32 {
 	return sr.Code
 }
 
-func (sr *SimpleResult) GetStatus() uint32 {
+func (sr *ErrorModel) GetStatus() uint32 {
 	return sr.Status
 }
 
-func (sr *SimpleResult) SetStatus(status uint32) {
-	sr.Status = status
-}
-
-func (sr *SimpleResult) GetName() string {
+func (sr *ErrorModel) GetName() string {
 	return sr.Name
 }
 
-func (sr *SimpleResult) SetName(name string) {
-	sr.Name = name
-}
-
-func (sr *SimpleResult) GetMessage() string {
+func (sr *ErrorModel) GetMessage() string {
 	return sr.Message
 }
 
-func (sr *SimpleResult) SetMessage(message string) {
-	if len(sr.Details) > 0 {
-		message = fmt.Sprintf(message, sr.Details)
-	}
-	sr.Message = message
+func (sr *ErrorModel) GetDetails() []string {
+	return sr.Details
 }
 
-var _ StatusResult = (*SimpleResult)(nil)
+var _ Error = (*ErrorModel)(nil)
 
 // StatusError 创建StatusResult错误实例. 必须注意status与code的取值范围:
 // - Status 取值范围(0,1024)
 // - Code 取值范围(0,4194304)
-func StatusError(status uint32, code uint32, message string, details ...string) StatusResult {
+func StatusError(status uint32, code uint32, message string, details ...string) Error {
 
 	status &= StatusMask
 	code &= CodeMask
@@ -95,7 +81,7 @@ func StatusError(status uint32, code uint32, message string, details ...string) 
 	if len(details) > 0 {
 		message = fmt.Sprintf(message, AnySlice(details)...)
 	}
-	return &SimpleResult{
+	return &ErrorModel{
 		Status:  status,
 		Code:    code,
 		Message: message,
@@ -103,8 +89,8 @@ func StatusError(status uint32, code uint32, message string, details ...string) 
 	}
 }
 
-// ErrorStack 打印堆栈追踪信息,如果是"/src/runtime/"自动跳过!
-func ErrorStack(skip int, sep string) string {
+// StackTrace 打印堆栈追踪信息,如果是"/src/runtime/"自动跳过!
+func StackTrace(skip int, sep string) string {
 	var sb strings.Builder
 	for i := 1; ; i++ {
 		_, file, line, ok := runtime.Caller(i)

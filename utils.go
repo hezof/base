@@ -81,6 +81,15 @@ func NvlB(bs ...bool) bool {
 	return false
 }
 
+func NvlD(ds ...time.Duration) time.Duration {
+	for _, d := range ds {
+		if d != 0 {
+			return d
+		}
+	}
+	return 0
+}
+
 var ZeroTime = time.Unix(0, 0)
 
 func NvlT(ts ...time.Time) time.Time {
