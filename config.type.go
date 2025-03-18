@@ -13,11 +13,11 @@ import (
 func ConfigBool(path string) (bool, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return false, fmt.Errorf("config unknown %v", path)
+		return false, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsBool(val)
 	if err != nil {
-		return false, fmt.Errorf("config invalid %v, %v", path, err)
+		return false, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -25,11 +25,11 @@ func ConfigBool(path string) (bool, error) {
 func ConfigString(path string) (string, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return "", fmt.Errorf("config unknown %v", path)
+		return "", fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsString(val)
 	if err != nil {
-		return "", fmt.Errorf("config invalid %v, %v", path, err)
+		return "", fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -37,11 +37,11 @@ func ConfigString(path string) (string, error) {
 func ConfigTime(path string) (time.Time, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return ZeroTime, fmt.Errorf("config unknown %v", path)
+		return ZeroTime, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsTime(val)
 	if err != nil {
-		return ZeroTime, fmt.Errorf("config invalid %v, %v", path, err)
+		return ZeroTime, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -49,11 +49,11 @@ func ConfigTime(path string) (time.Time, error) {
 func ConfigDuration(path string) (time.Duration, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsDuration(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -61,11 +61,11 @@ func ConfigDuration(path string) (time.Duration, error) {
 func ConfigInt(path string) (int, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsInt(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -73,11 +73,11 @@ func ConfigInt(path string) (int, error) {
 func ConfigInt8(path string) (int8, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsInt8(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -85,11 +85,11 @@ func ConfigInt8(path string) (int8, error) {
 func ConfigInt16(path string) (int16, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsInt16(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -97,11 +97,11 @@ func ConfigInt16(path string) (int16, error) {
 func ConfigInt32(path string) (int32, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsInt32(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -109,11 +109,11 @@ func ConfigInt32(path string) (int32, error) {
 func ConfigInt64(path string) (int64, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsInt64(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -121,11 +121,11 @@ func ConfigInt64(path string) (int64, error) {
 func ConfigUint(path string) (uint, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsUint(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -133,11 +133,11 @@ func ConfigUint(path string) (uint, error) {
 func ConfigUint8(path string) (uint8, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsUint8(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -145,11 +145,11 @@ func ConfigUint8(path string) (uint8, error) {
 func ConfigUint16(path string) (uint16, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsUint16(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -157,11 +157,11 @@ func ConfigUint16(path string) (uint16, error) {
 func ConfigUint32(path string) (uint32, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsUint32(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -169,11 +169,11 @@ func ConfigUint32(path string) (uint32, error) {
 func ConfigUint64(path string) (uint64, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsUint64(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -181,11 +181,11 @@ func ConfigUint64(path string) (uint64, error) {
 func ConfigFloat32(path string) (float32, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsFloat32(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -193,11 +193,11 @@ func ConfigFloat32(path string) (float32, error) {
 func ConfigFloat64(path string) (float64, error) {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		return 0, fmt.Errorf("config unknown %v", path)
+		return 0, fmt.Errorf("unknown config %v", path)
 	}
 	ret, err := AsFloat64(val)
 	if err != nil {
-		return 0, fmt.Errorf("config invalid %v, %v", path, err)
+		return 0, fmt.Errorf("invalid config %v, %v", path, err)
 	}
 	return ret, nil
 }
@@ -209,11 +209,11 @@ func ConfigFloat64(path string) (float64, error) {
 func MustConfigBool(path string) bool {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsBool(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -221,11 +221,11 @@ func MustConfigBool(path string) bool {
 func MustConfigString(path string) string {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsString(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -233,11 +233,11 @@ func MustConfigString(path string) string {
 func MustConfigTime(path string) time.Time {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsTime(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -245,11 +245,11 @@ func MustConfigTime(path string) time.Time {
 func MustConfigDuration(path string) time.Duration {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsDuration(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -257,11 +257,11 @@ func MustConfigDuration(path string) time.Duration {
 func MustConfigInt(path string) int {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsInt(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -269,11 +269,11 @@ func MustConfigInt(path string) int {
 func MustConfigInt8(path string) int8 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsInt8(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -281,11 +281,11 @@ func MustConfigInt8(path string) int8 {
 func MustConfigInt16(path string) int16 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsInt16(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -293,11 +293,11 @@ func MustConfigInt16(path string) int16 {
 func MustConfigInt32(path string) int32 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsInt32(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -305,11 +305,11 @@ func MustConfigInt32(path string) int32 {
 func MustConfigInt64(path string) int64 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsInt64(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -317,11 +317,11 @@ func MustConfigInt64(path string) int64 {
 func MustConfigUint(path string) uint {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsUint(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -329,11 +329,11 @@ func MustConfigUint(path string) uint {
 func MustConfigUint8(path string) uint8 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsUint8(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -341,11 +341,11 @@ func MustConfigUint8(path string) uint8 {
 func MustConfigUint16(path string) uint16 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsUint16(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -353,11 +353,11 @@ func MustConfigUint16(path string) uint16 {
 func MustConfigUint32(path string) uint32 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsUint32(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -365,11 +365,11 @@ func MustConfigUint32(path string) uint32 {
 func MustConfigUint64(path string) uint64 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsUint64(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -377,11 +377,11 @@ func MustConfigUint64(path string) uint64 {
 func MustConfigFloat32(path string) float32 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsFloat32(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -389,11 +389,11 @@ func MustConfigFloat32(path string) float32 {
 func MustConfigFloat64(path string) float64 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		panic(fmt.Errorf("config unknown %v", path))
+		panic(fmt.Errorf("unknown config %v", path))
 	}
 	ret, err := AsFloat64(val)
 	if err != nil {
-		panic(fmt.Errorf("config invalid %v, %v", path, err))
+		panic(fmt.Errorf("invalid config %v, %v", path, err))
 	}
 	return ret
 }
@@ -405,12 +405,12 @@ func MustConfigFloat64(path string) float64 {
 func OptiConfigBool(path string, def bool) bool {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsBool(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -419,12 +419,12 @@ func OptiConfigBool(path string, def bool) bool {
 func OptiConfigString(path string, def string) string {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsString(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -433,12 +433,12 @@ func OptiConfigString(path string, def string) string {
 func OptiConfigTime(path string, def time.Time) time.Time {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsTime(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -447,12 +447,12 @@ func OptiConfigTime(path string, def time.Time) time.Time {
 func OptiConfigDuration(path string, def time.Duration) time.Duration {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsDuration(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -461,12 +461,12 @@ func OptiConfigDuration(path string, def time.Duration) time.Duration {
 func OptiConfigInt(path string, def int) int {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsInt(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -475,12 +475,12 @@ func OptiConfigInt(path string, def int) int {
 func OptiConfigInt8(path string, def int8) int8 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsInt8(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -489,12 +489,12 @@ func OptiConfigInt8(path string, def int8) int8 {
 func OptiConfigInt16(path string, def int16) int16 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsInt16(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -503,12 +503,12 @@ func OptiConfigInt16(path string, def int16) int16 {
 func OptiConfigInt32(path string, def int32) int32 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsInt32(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -517,12 +517,12 @@ func OptiConfigInt32(path string, def int32) int32 {
 func OptiConfigInt64(path string, def int64) int64 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsInt64(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -531,12 +531,12 @@ func OptiConfigInt64(path string, def int64) int64 {
 func OptiConfigUint(path string, def uint) uint {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsUint(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -545,12 +545,12 @@ func OptiConfigUint(path string, def uint) uint {
 func OptiConfigUint8(path string, def uint8) uint8 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsUint8(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -559,12 +559,12 @@ func OptiConfigUint8(path string, def uint8) uint8 {
 func OptiConfigUint16(path string, def uint16) uint16 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsUint16(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -573,12 +573,12 @@ func OptiConfigUint16(path string, def uint16) uint16 {
 func OptiConfigUint32(path string, def uint32) uint32 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsUint32(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -587,12 +587,12 @@ func OptiConfigUint32(path string, def uint32) uint32 {
 func OptiConfigUint64(path string, def uint64) uint64 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsUint64(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -601,12 +601,12 @@ func OptiConfigUint64(path string, def uint64) uint64 {
 func OptiConfigFloat32(path string, def float32) float32 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsFloat32(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret
@@ -615,12 +615,12 @@ func OptiConfigFloat32(path string, def float32) float32 {
 func OptiConfigFloat64(path string, def float64) float64 {
 	val, ok := _configContext.GetFirst(path)
 	if !ok {
-		log.Warn("config unknown %v", path)
+		log.Warn("unknown config %v", path)
 		return def
 	}
 	ret, err := AsFloat64(val)
 	if err != nil {
-		log.Warn("config invalid %v, %v", path, err)
+		log.Warn("invalid config %v, %v", path, err)
 		return def
 	}
 	return ret

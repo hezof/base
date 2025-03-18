@@ -31,7 +31,7 @@ type Hook struct {
 func (h Hook) Exec(config *ConfigContext, managed *ManagedContext) {
 	defer func() {
 		if prr := recover(); prr != nil {
-			log.Error("hook exec panic: %v, %v", h.Name, prr)
+			log.Error("exec hook panic: %v, %v\n %v", h.Name, prr, StackTrace(2, `|`))
 		}
 	}()
 	h.Call(config, managed)

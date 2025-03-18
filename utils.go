@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -46,6 +48,12 @@ func Vals[K comparable, V any](m map[K]V) []V {
 		s = append(s, v)
 	}
 	return s
+}
+
+func PutAll[K comparable, V any](dst, src map[K]V) {
+	for k, v := range src {
+		dst[k] = v
+	}
 }
 
 func NvlS(ss ...string) string {
@@ -297,4 +305,28 @@ func ReadFile(files []string, err error) ([][]byte, error) {
 		}
 	}
 	return datas, nil
+}
+
+// StackTrace 打印堆栈追踪信息,如果是"/src/runtime/"自动跳过!
+func StackTrace(skip int, sep string) string {
+	var sb strings.Builder
+	for i := 1; ; i++ {
+		_, file, line, ok := runtime.Caller(i)
+		if !ok {
+			return sb.String()
+		}
+		// 过滤runtime的行项,避免错误日志过多!
+		if strings.Index(file, "/src/runtime/") == -1 {
+			if skip > 0 {
+				skip--
+			} else {
+				if sb.Len() > 0 {
+					sb.WriteString(sep)
+				}
+				sb.WriteString(file)
+				sb.WriteByte(':')
+				sb.WriteString(strconv.Itoa(line))
+			}
+		}
+	}
 }
