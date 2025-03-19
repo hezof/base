@@ -3,18 +3,18 @@ package base
 import "fmt"
 
 var (
-	_true  = true
-	_false = false
+	TRUE  = true
+	FALSE = false
 )
 
 func DecodeBoolOptional(r *JsonDecoder, p **bool) {
 	switch r.token {
 	case True:
 		r.skipTrue()
-		*p = &_true
+		*p = &TRUE
 	case False:
 		r.skipFalse()
-		*p = &_false
+		*p = &FALSE
 	case Null:
 		r.skipNull()
 	case 0:

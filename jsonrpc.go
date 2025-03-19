@@ -99,7 +99,7 @@ func NewJsonRpcClient(endpoint string, config *HttpConfig, header HttpHeader, en
 		encoder = EncodeProtoJsonData
 	}
 	if decoder == nil {
-		decoder = DecodeProtoJson
+		decoder = DecodeProtoJsonReader
 	}
 
 	return &JsonRpcClient{

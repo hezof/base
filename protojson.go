@@ -15,6 +15,14 @@ var (
 	DecodeJson                 = json.Unmarshal // 标准解码
 )
 
+func DecodeJsonReader(in io.Reader, val any) error {
+	data, err := io.ReadAll(in)
+	if err != nil {
+		return err
+	}
+	return DecodeJson(data, val)
+}
+
 /*
 FieldCodec 核心接口, 实现Message的解码与编码.
 该接口用于加速proto.Message的JSON解码/编码速度.
@@ -222,7 +230,7 @@ func PutEncoder(enc *JsonEncoder) {
 	encoders.Put(enc.Clean())
 }
 
-func DecodeProtoJson(in io.Reader, val any) error {
+func DecodeProtoJsonReader(in io.Reader, val any) error {
 	// 加速实现JsonCodec
 	d := GetDecoder(in)
 	defer PutDecoder(d)
@@ -231,7 +239,15 @@ func DecodeProtoJson(in io.Reader, val any) error {
 	return d.Close()
 }
 
-func EncodeProtoJson(out io.Writer, val any) error {
+func DecodeProtoJsonData(data []byte, val any) error {
+	// 加速实现JsonCodec
+	d := NewJsonBuffer(data)
+
+	DecodeAny(d, val)
+	return d.Close()
+}
+
+func EncodeProtoJsonWriter(out io.Writer, val any) error {
 	e := GetEncoder(out)
 	defer PutEncoder(e)
 
