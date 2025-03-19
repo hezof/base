@@ -35,6 +35,7 @@ type ConfigPlugin interface {
 }
 
 // ConfigContext 配置结构
+// 支持多配置文件, 各个配置文件的数据独立存储,不做合并. 所以values是个slice!
 type ConfigContext struct {
 	sync.RWMutex
 	Plugin ConfigPlugin
@@ -44,6 +45,12 @@ type ConfigContext struct {
 func (c *ConfigContext) SetTomlData(datas ...[]byte) (err error) {
 	c.Lock()
 	defer c.Unlock()
+
+	/*
+		设置流程: 遍历多配置文件, 各配置数据独立存储, 不做合并!
+		1. 调用配置插件(如果存在的话),例如模板引擎(text/template),或者其他...
+		2. 解码配置(固定toml), 其他数据请在第1步借助插件替换为toml. 例如: MarshalConfig(...)
+	*/
 
 	for _, data := range datas {
 		if c.Plugin != nil {
@@ -64,6 +71,9 @@ func (c *ConfigContext) GetFirst(path string) (any, bool) {
 	c.RLock()
 	defer c.RUnlock()
 
+	/*
+		查找流程: 遍历多配置文件(按设置顺序), 返回第一个符合path的配置
+	*/
 	for _, value := range c.Values {
 		val, ok := ExtractConfig(value, path)
 		if ok {
@@ -77,6 +87,9 @@ func (c *ConfigContext) GetLast(path string) (any, bool) {
 	c.RLock()
 	defer c.RUnlock()
 
+	/*
+		查找流程: 遍历多配置文件(按设置逆序), 返回最后一个符合path的配置.
+	*/
 	for i := len(c.Values) - 1; i >= 0; i-- {
 		val, ok := ExtractConfig(c.Values[i], path)
 		if ok {
@@ -90,6 +103,9 @@ func (c *ConfigContext) GetAll(path string) []any {
 	c.RLock()
 	defer c.RUnlock()
 
+	/*
+		查找流程: 遍历多配置文件(按设置顺序), 返回所有符合path的配置.
+	*/
 	var all []any
 	for _, value := range c.Values {
 		val, ok := ExtractConfig(value, path)
@@ -104,6 +120,9 @@ func (c *ConfigContext) GetAll(path string) []any {
 type EnvironConfigPlugin struct{}
 
 func (cp *EnvironConfigPlugin) Data() map[string]any {
+	/*
+		数据逻辑: 读取所有环境变量作为数据, 默认所有值都是string, 但支持toml的array([...])与table({...})
+	*/
 	data := make(map[string]any)
 	for _, env := range os.Environ() {
 		pos := strings.IndexByte(env, '=')
@@ -117,7 +136,7 @@ func (cp *EnvironConfigPlugin) Data() map[string]any {
 			case strings.HasPrefix(val, "["):
 				arr := make([]any, 0, 4)
 				if err := toml.Unmarshal([]byte(val), &arr); err != nil {
-					log.Error("Unmarshal array error: %v, %v", key, err)
+					log.Error("unmarshal toml array error: %v, %v", key, err)
 					data[key] = val
 				} else {
 					data[key] = arr
@@ -125,7 +144,7 @@ func (cp *EnvironConfigPlugin) Data() map[string]any {
 			case strings.HasPrefix(val, "{"):
 				tbl := make(map[string]any)
 				if err := toml.Unmarshal([]byte(val), &tbl); err != nil {
-					log.Error("Unmarshal table error: %v, %v", key, err)
+					log.Error("unmarshal toml table error: %v, %v", key, err)
 					data[key] = val
 				} else {
 					data[key] = tbl
@@ -139,6 +158,9 @@ func (cp *EnvironConfigPlugin) Data() map[string]any {
 }
 
 func (cp *EnvironConfigPlugin) Exec(data []byte) ([]byte, error) {
+	/*
+		默认EnvironConfigPlugin插件使用text/template模板引擎, 其它引擎请请用SetConfigPlugin()替换
+	*/
 	tpl, err := template.New("").Parse(string(data))
 	if err != nil {
 		return nil, err
