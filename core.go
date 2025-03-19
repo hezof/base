@@ -53,7 +53,7 @@ func InitTomlData(datas ...[]byte) {
 	ExecHook(AfterInit, _configContext, _managedContext)
 }
 
-func Reload(reloadPolicy func(kind, name string, oldValues, newValues map[string]any) bool) error {
+func Reload(reloadPolicy func(base string, config *ManagedConfig, newValues map[string]any) bool) error {
 	datas, err := ReadFile(ConfigTomlFile())
 	if err != nil {
 		return fmt.Errorf("reload config context error: %v", err)
@@ -61,7 +61,7 @@ func Reload(reloadPolicy func(kind, name string, oldValues, newValues map[string
 	return ReloadTomlData(reloadPolicy, datas...)
 }
 
-func ReloadTomlData(reloadPolicy func(kind, name string, oldValues, newValues map[string]any) bool, datas ...[]byte) error {
+func ReloadTomlData(reloadPolicy func(base string, config *ManagedConfig, newValues map[string]any) bool, datas ...[]byte) error {
 	// 0. 重载配置
 	if err := _configContext.SetTomlData(datas...); err != nil {
 		return fmt.Errorf("reload config context error: %v", err)
@@ -79,7 +79,7 @@ func ReloadTomlData(reloadPolicy func(kind, name string, oldValues, newValues ma
 	return nil
 }
 
-func Exit(hints ...func(kind, name string, err error)) {
+func Exit(hints ...func(base string, config *ManagedConfig, err error)) {
 
 	// 1. 回调钩子
 	ExecHook(BeforeReload, _configContext, _managedContext)
