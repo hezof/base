@@ -2,14 +2,13 @@ package base
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 )
 
-type JsonEncoder func(v any) ([]byte, error)
-type JsonDecoder func(r io.Reader, v any) error
+type JsonMarshal func(v any) ([]byte, error)
+type JsonUnmarshal func(r io.Reader, v any) error
 
 // HttpHeader http头部
 type HttpHeader interface {
@@ -21,8 +20,8 @@ type JsonRpcClient struct {
 	endpoint string
 	client   HttpClient
 	header   HttpHeader
-	encoder  func(v any) ([]byte, error)
-	decoder  func(r io.Reader, v any) error
+	encoder  JsonMarshal
+	decoder  JsonUnmarshal
 }
 
 func (c *JsonRpcClient) GET(uri string, req any, rsp any, status ...int) error {
@@ -91,20 +90,16 @@ func (c *JsonRpcClient) Do(method string, uri string, req any, rsp any, status .
 	return nil
 }
 
-func ReadJson(r io.Reader, v any) error {
-	return json.NewDecoder(r).Decode(v)
-}
-
 // NewJsonRpcClient 创建rpc客户端
-func NewJsonRpcClient(endpoint string, config *HttpConfig, header HttpHeader, encoder JsonEncoder, decoder JsonDecoder) *JsonRpcClient {
+func NewJsonRpcClient(endpoint string, config *HttpConfig, header HttpHeader, encoder JsonMarshal, decoder JsonUnmarshal) *JsonRpcClient {
 	if config == nil {
 		config = new(HttpConfig)
 	}
 	if encoder == nil {
-		encoder = json.Marshal
+		encoder = EncodeProtoJsonData
 	}
 	if decoder == nil {
-		decoder = ReadJson
+		decoder = DecodeProtoJson
 	}
 
 	return &JsonRpcClient{
