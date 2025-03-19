@@ -1,8 +1,8 @@
-package core
+package base
 
 import (
 	"bytes"
-	"github.com/hezof/core/internal/toml"
+	"github.com/hezof/base/internal/toml"
 	"github.com/hezof/log"
 	"os"
 	"path/filepath"

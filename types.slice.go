@@ -1,4 +1,4 @@
-package core
+package base
 
 // AnySlice 转为any分片
 func AnySlice[V any](vs []V) []any {

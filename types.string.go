@@ -1,8 +1,8 @@
-package core
+package base
 
 import (
 	"encoding/json"
-	"github.com/hezof/core/internal/toml"
+	"github.com/hezof/base/internal/toml"
 	"unsafe"
 )
 
