@@ -7,8 +7,6 @@ import (
 	"sync"
 )
 
-const ID_NAME = "_id" // 同mongodb
-
 // ManagedTarget 托管目标接口
 type ManagedTarget = any
 
@@ -25,8 +23,20 @@ type ManagedConfig struct {
 	Value map[string]any // 配置值
 }
 
-// AssertManagedConfig 解析多个文件base路径的配置, 可能有2种形式: "[base]"或"[[base]]"
-func AssertManagedConfig(base string, configGroupSlice []any) ([]*ManagedConfig, error) {
+// [约定] _id 规则.
+func _id(base string, kvs map[string]any) (string, error) {
+	rt := ""
+	// 全局惟一的资源实例,可能不会设置_id
+	if v, ok := kvs["_id"]; ok {
+		if rt, ok = v.(string); !ok {
+			return rt, fmt.Errorf("invalid type for config _id %v, expected string, but found %T", base, v)
+		}
+	}
+	return rt, nil
+}
+
+// [约定] _flat 由于多个文件(glob) + 2种格式("[base]"或"[[base]]"), 需要将配置展开为平面分片.
+func _flat(base string, configGroupSlice []any) ([]map[string]any, error) {
 	// 打平(展开)配置组分片
 	flat := make([]map[string]any, 0, len(configGroupSlice))
 	for _, configGroup := range configGroupSlice {
@@ -45,19 +55,56 @@ func AssertManagedConfig(base string, configGroupSlice []any) ([]*ManagedConfig,
 			return nil, fmt.Errorf("invalid type for config %v, expected map[string]any(or its slice), but found %T", base, configGroup)
 		}
 	}
+	return flat, nil
+}
+
+// [约定] _names 配置_id支持别名机制(多个名字), 可以用逗号分隔
+func _names(id string) []string {
+	// 全局惟一的资源实例
+	if id == "" {
+		return []string{""}
+	}
+	n := 0
+	for _, c := range id {
+		if c == ',' {
+			n++
+		}
+	}
+	s := make([]string, 0, n)
+	for {
+		pos := strings.IndexByte(id, ',')
+		if pos == -1 {
+			if v := strings.TrimSpace(id); v != "" {
+				s = append(s, v)
+			}
+			return s
+		}
+		if v := strings.TrimSpace(id[:pos]); v != "" {
+			s = append(s, v)
+		}
+		id = id[pos+1:]
+	}
+}
+
+// AssertManagedConfig 解析多个文件base路径的配置, 可能有2种形式: "[base]"或"[[base]]"
+func AssertManagedConfig(base string, vals []any) ([]*ManagedConfig, error) {
+
+	// 打平(展开)配置组分片. 多个文件(glob) + 2种格式("[base]"或"[[base]]")
+	flat, err := _flat(base, vals)
+	if err != nil {
+		return nil, err
+	}
+
 	// 检测名字冲突并转换配置
 	exists := make(map[string]bool)
 	result := make([]*ManagedConfig, 0, len(flat))
 
-	for _, vals := range flat {
-		var key string
-		val, ok := vals[ID_NAME]
-		if ok {
-			if key, ok = val.(string); !ok {
-				return nil, fmt.Errorf("invalid type for config _id %v, expected string, but found %T", base, val)
-			}
+	for _, kvs := range flat {
+		id, err := _id(base, kvs)
+		if err != nil {
+			return nil, err
 		}
-		names := strings.Split(key, ",")
+		names := _names(id)
 		for _, name := range names {
 			if exists[name] {
 				return nil, fmt.Errorf("existed name for config %v.%v", base, name)
@@ -65,21 +112,31 @@ func AssertManagedConfig(base string, configGroupSlice []any) ([]*ManagedConfig,
 			exists[name] = true
 		}
 		result = append(result, &ManagedConfig{
-			ID:    key,
+			ID:    id,
 			Names: names,
-			Value: vals,
+			Value: kvs,
 		})
 	}
 
 	return result, nil
 }
 
-func AssertManagedConfigValues(vs any, ok bool) (map[string]any, bool) {
-	if !ok {
-		return nil, false
+func AssertManagedConfigValues(base, dstId string, vals []any) (map[string]any, error) {
+	// 打平(展开)配置组分片. 多个文件(glob) + 2种格式("[base]"或"[[base]]")
+	flat, err := _flat(base, vals)
+	if err != nil {
+		return nil, err
 	}
-	rt, ok := vs.(map[string]any)
-	return rt, ok
+	for _, kvs := range flat {
+		id, err := _id(base, kvs)
+		if err != nil {
+			return nil, err
+		}
+		if id == dstId {
+			return kvs, nil
+		}
+	}
+	return nil, nil
 }
 
 // ManagedFactory 组件工厂接口
@@ -148,7 +205,7 @@ func (mc *ManagedContext) RegisterFactory(base string, factory ManagedFactory) e
 
 	ft, ok := mc.Proxies[base]
 	if ok {
-		return fmt.Errorf("factory existed %v(%T)", base, ft)
+		return fmt.Errorf("existed factory %v(%T)", base, ft)
 	}
 	mc.Indexes = append(mc.Indexes, base)
 	mc.Proxies[base] = &ManagedFactoryProxy{
@@ -159,11 +216,19 @@ func (mc *ManagedContext) RegisterFactory(base string, factory ManagedFactory) e
 	return nil
 }
 
-func (mc *ManagedContext) RetrieveFactory(base string) ManagedFactory {
+func (mc *ManagedContext) RetrieveComponent(base string, names ...string) (ManagedComponent, error) {
 	mc.RLock()
 	defer mc.RUnlock()
 	// 返回代理工厂
-	return mc.Proxies[base]
+	ft, ok := mc.Proxies[base]
+	if !ok {
+		return nil, fmt.Errorf("unknown factory %v", base)
+	}
+	name := ""
+	if len(names) > 0 {
+		name = names[0]
+	}
+	return ft.Manage(name), nil
 }
 
 func (mc *ManagedContext) Init(configContext *ConfigContext) error {
@@ -229,7 +294,7 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 		- 用proxy.Create(config)创建新目标, 并遍历已有Components, 替换其目标
 		- 用proxy.Destroy(config, target)销毁旧目标
 	*/
-	var err error
+
 	for _, base := range mc.Indexes {
 		proxy := mc.Proxies[base]
 	_TARGET_:
@@ -237,8 +302,12 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 			oldValues := ct.Config.Value
 			oldTarget := ct.Target
 			// 重载新配置
-			newValues, ok := AssertManagedConfigValues(configContext.GetFirst(base + "." + ct.Config.ID))
-			if ok && reloadPolicy != nil && reloadPolicy(base, ct.Config, newValues) {
+			newValues, err := AssertManagedConfigValues(base, ct.Config.ID, configContext.GetAll(base))
+			if err != nil {
+				log.Error("reload managed target error %v.%v, %v", base, ct.Config.ID, err)
+				continue _TARGET_
+			}
+			if newValues != nil && reloadPolicy != nil && reloadPolicy(base, ct.Config, newValues) {
 
 				log.Info("reload managed target %v.%v", base, ct.Config.ID)
 
@@ -262,6 +331,14 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 			}
 		}
 	}
+}
+
+func _path(base, _id string) string {
+	// 全局惟一实例
+	if _id == "" {
+		return base
+	}
+	return base + "." + _id
 }
 
 func (mc *ManagedContext) Exit(hints ...func(base string, config *ManagedConfig, err error)) {

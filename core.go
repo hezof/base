@@ -14,13 +14,13 @@ func Register(base string, factory ManagedFactory) {
 	}
 }
 
-// Resource 断言组件实例, 若无kind工厂会panic!
-func Resource[T any](kind, name string) T {
-	factory := _managedContext.RetrieveFactory(kind)
-	if factory == nil {
-		panic(fmt.Errorf("retrieve factory empty: %v", kind))
+// Component 断言组件实例, 若无base工厂会panic!
+func Component[T any](base string, name ...string) T {
+	component, err := _managedContext.RetrieveComponent(base, name...)
+	if err == nil {
+		panic(fmt.Errorf("retrieve component error: %v.%v, %v", base, name, err))
 	}
-	return factory.Manage(name).(T)
+	return component.(T)
 }
 
 /*************************************************
