@@ -2,7 +2,7 @@ package base
 
 import (
 	"fmt"
-	"github.com/hezof/base/internal/encoding/json"
+	"github.com/hezof/base/internal/json"
 	"io"
 	"reflect"
 	"sync"
