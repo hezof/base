@@ -216,17 +216,13 @@ func (mc *ManagedContext) RegisterFactory(base string, factory ManagedFactory) e
 	return nil
 }
 
-func (mc *ManagedContext) RetrieveComponent(base string, names ...string) (ManagedComponent, error) {
+func (mc *ManagedContext) RetrieveComponent(base string, name string) (ManagedComponent, error) {
 	mc.RLock()
 	defer mc.RUnlock()
 	// 返回代理工厂
 	ft, ok := mc.Proxies[base]
 	if !ok {
 		return nil, fmt.Errorf("unknown factory %v", base)
-	}
-	name := ""
-	if len(names) > 0 {
-		name = names[0]
 	}
 	return ft.Manage(name), nil
 }

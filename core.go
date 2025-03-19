@@ -15,8 +15,8 @@ func Register(base string, factory ManagedFactory) {
 }
 
 // Component 断言组件实例, 若无base工厂会panic!
-func Component[T any](base string, name ...string) T {
-	component, err := _managedContext.RetrieveComponent(base, name...)
+func Component[T any](base string, name string) T {
+	component, err := _managedContext.RetrieveComponent(base, name)
 	if err == nil {
 		panic(fmt.Errorf("retrieve component error: %v.%v, %v", base, name, err))
 	}
