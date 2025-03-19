@@ -56,3 +56,13 @@ func TestMapStruct(t *testing.T) {
 	bs, _ := UnBase64("5rWL6K+V5pWw5o2u")
 	fmt.Println(string(bs))
 }
+
+func TestTomlStruct(t *testing.T) {
+	fmt.Println(ToJson(mdata))
+	var stu *Student
+	err := MapStruct(mdata, &stu, "json")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(ToToml(stu))
+}
