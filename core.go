@@ -7,10 +7,10 @@ import "fmt"
  *************************************************/
 
 // Register 注册组件工厂, 重复注册会panic!
-func Register(kind string, factory ManagedFactory) {
-	err := _managedContext.RegisterFactory(kind, factory)
+func Register(base string, factory ManagedFactory) {
+	err := _managedContext.RegisterFactory(base, factory)
 	if err != nil {
-		panic(fmt.Errorf("register factory error: %v, %v", kind, err))
+		panic(fmt.Errorf("register factory error: %v, %v", base, err))
 	}
 }
 
