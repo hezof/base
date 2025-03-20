@@ -1,6 +1,7 @@
 package base
 
 import (
+	"cmp"
 	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
@@ -10,6 +11,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -312,4 +315,48 @@ func ReadFile(files []string, err error) ([][]byte, error) {
 		}
 	}
 	return datas, nil
+}
+
+func Min[V cmp.Ordered](vs ...V) V {
+	var m V
+	for _, v := range vs {
+		if m > v {
+			m = v
+		}
+	}
+	return m
+}
+
+func Max[V cmp.Ordered](vs ...V) V {
+	var m V
+	for _, v := range vs {
+		if m < v {
+			m = v
+		}
+	}
+	return m
+}
+
+// StackTrace 打印堆栈追踪信息,如果是"/src/runtime/"自动跳过!
+func StackTrace(skip int, sep string) string {
+	var sb strings.Builder
+	for i := 1; ; i++ {
+		_, file, line, ok := runtime.Caller(i)
+		if !ok {
+			return sb.String()
+		}
+		// 过滤runtime的行项,避免错误日志过多!
+		if strings.Index(file, "/src/runtime/") == -1 {
+			if skip > 0 {
+				skip--
+			} else {
+				if sb.Len() > 0 {
+					sb.WriteString(sep)
+				}
+				sb.WriteString(file)
+				sb.WriteByte(':')
+				sb.WriteString(strconv.Itoa(line))
+			}
+		}
+	}
 }

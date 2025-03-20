@@ -2,14 +2,12 @@ package base
 
 import (
 	"fmt"
-	"runtime"
-	"strconv"
-	"strings"
+	"net/http"
 )
 
 /*
 StatusResult统一结果与错误的数据结构, 并实现与Grpc Error的转换.
-因为Grpc Error Status只有Code字段, 约定StatusResult的Status/Code分别存储在高9位与低22位! 由于int32需要保留一个符号位
+因为Grpc Error Status只有Code字段, 约定StatusResult的Status/Code分别存储在高10位与低22位!
 
 约定StatusResult Code取值范围:
 - [0,17)         表示保留错误码! grpc内置错误码, 参考codes._maxCode
@@ -19,69 +17,111 @@ StatusResult统一结果与错误的数据结构, 并实现与Grpc Error的转�
 - (0,511]
 */
 const (
-	CodeBits   = 22 // 由于grpc的问题,  int32需要保留一个符号位
-	CodeMask   = 1<<CodeBits - 1
-	StatusBits = 9
-	StatusMask = 1<<StatusBits - 1
+	ErrorCodeBits   = 22 // 由于grpc的问题,  int32需要保留一个符号位
+	ErrorCodeMask   = 1<<ErrorCodeBits - 1
+	ErrorStatusBits = 9
+	ErrorStatusMask = 1<<ErrorStatusBits - 1
 )
 
-// Error 带状态码的错误
+// Error 带状态码的结果
 type Error interface {
 	error
 	GetCode() uint32
 	GetStatus() uint32
+	SetStatus(status uint32)
 	GetName() string
+	SetName(name string)
 	GetMessage() string
+	SetMessage(message string)
 	GetDetails() []string
 }
 
-// ErrorModel 带状态的结果. 必须注意status与code的约定取值范围!
-type ErrorModel struct {
-	Status  uint32   // 状态代码(http).
-	Code    uint32   // 错误代码. 0表示成功
-	Name    string   // 错误名称. OK表示成功
-	Message string   // 错误消息.
-	Details []string `json:"-"` // 错误参数.
+// StatusResult 带状态的结果. 必须注意status与code的约定取值范围!
+type StatusResult struct {
+	Status  uint32   `json:"status,omitempty"`  // 状态代码(http).
+	Code    uint32   `json:"code"`              // 错误代码. 0表示成功
+	Name    string   `json:"name,omitempty"`    // 错误名称. OK表示成功
+	Message string   `json:"message,omitempty"` // 错误消息.
+	Details []string `json:"-"`                 // 错误参数.
+	Data    any      `json:"-"`                 // 结果数据
 }
 
-func (sr *ErrorModel) Error() string {
+func (sr *StatusResult) Error() string {
+	// 不能使用ToJson()会在EncodeField过程形成死循环
 	return ToJson(sr)
 }
 
-func (sr *ErrorModel) GetCode() uint32 {
+func (sr *StatusResult) GetCode() uint32 {
 	return sr.Code
 }
 
-func (sr *ErrorModel) GetStatus() uint32 {
+func (sr *StatusResult) GetStatus() uint32 {
 	return sr.Status
 }
 
-func (sr *ErrorModel) GetName() string {
+func (sr *StatusResult) SetStatus(status uint32) {
+	sr.Status = status
+}
+
+func (sr *StatusResult) GetName() string {
 	return sr.Name
 }
 
-func (sr *ErrorModel) GetMessage() string {
+func (sr *StatusResult) SetName(name string) {
+	sr.Name = name
+}
+
+func (sr *StatusResult) GetMessage() string {
 	return sr.Message
 }
 
-func (sr *ErrorModel) GetDetails() []string {
+func (sr *StatusResult) SetMessage(message string) {
+	if len(sr.Details) > 0 {
+		message = fmt.Sprintf(message, sr.Details)
+	}
+	sr.Message = message
+}
+
+func (sr *StatusResult) GetDetails() []string {
 	return sr.Details
 }
 
-var _ Error = (*ErrorModel)(nil)
+var _ Error = (*StatusResult)(nil)
+
+func (sr *StatusResult) DecodeField(r *JsonDecoder, f string) {
+	switch f {
+	case "code":
+		DecodeUint32(r, &sr.Code)
+	case "name":
+		DecodeString(r, &sr.Name)
+	case "message":
+		DecodeString(r, &sr.Message)
+	case "data":
+		DecodeAny(r, sr.Data)
+	}
+}
+
+func (sr *StatusResult) EncodeField(w *JsonEncoder) {
+	EncodeUint32_WithEmpty(w, "code", sr.Code)
+	EncodeString_OmitEmpty(w, "name", sr.Name)
+	EncodeString_OmitEmpty(w, "message", sr.Message)
+	EncodeAny_OmitEmpty(w, "data", sr.Data)
+}
+
+var _ FieldCodec = (*StatusResult)(nil)
 
 // StatusError 创建StatusResult错误实例. 必须注意status与code的取值范围:
 // - Status 取值范围(0,1024)
 // - Code 取值范围(0,4194304)
-func StatusError(status uint32, code uint32, message string, details ...string) Error {
+func StatusError(status uint32, code uint32, message string, details ...string) *StatusResult {
 
-	status &= StatusMask
-	code &= CodeMask
+	status &= ErrorStatusMask
+	code &= ErrorCodeMask
 
 	if len(details) > 0 {
 		message = fmt.Sprintf(message, AnySlice(details)...)
 	}
-	return &ErrorModel{
+	return &StatusResult{
 		Status:  status,
 		Code:    code,
 		Message: message,
@@ -89,26 +129,28 @@ func StatusError(status uint32, code uint32, message string, details ...string) 
 	}
 }
 
-// StackTrace 打印堆栈追踪信息,如果是"/src/runtime/"自动跳过!
-func StackTrace(skip int, sep string) string {
-	var sb strings.Builder
-	for i := 1; ; i++ {
-		_, file, line, ok := runtime.Caller(i)
-		if !ok {
-			return sb.String()
+// StatusErrorFrom 定义统一的error转换为*Result规则
+func StatusErrorFrom(err error) *StatusResult {
+
+	// 内部错误
+	if val, ok := err.(*StatusResult); ok {
+		return val
+	}
+
+	// 接口错误
+	if val, ok := err.(Error); ok {
+		return &StatusResult{
+			Status:  val.GetStatus(),
+			Code:    val.GetCode(),
+			Message: val.GetMessage(),
+			Details: val.GetDetails(),
 		}
-		// 过滤runtime的行项,避免错误日志过多!
-		if strings.Index(file, "/src/runtime/") == -1 {
-			if skip > 0 {
-				skip--
-			} else {
-				if sb.Len() > 0 {
-					sb.WriteString(sep)
-				}
-				sb.WriteString(file)
-				sb.WriteByte(':')
-				sb.WriteString(strconv.Itoa(line))
-			}
-		}
+	}
+
+	// 其他错误
+	return &StatusResult{
+		Status:  http.StatusInternalServerError,
+		Code:    2, // Grpc Unknown是2
+		Message: err.Error(),
 	}
 }

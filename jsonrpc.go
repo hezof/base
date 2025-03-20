@@ -126,3 +126,30 @@ func content(data []byte) io.Reader {
 	}
 	return bytes.NewReader(data)
 }
+
+/*************************************************
+ * 上移了protoapi的结果类型
+ *************************************************/
+
+func NormalResult[V any](v *V) *StatusResult {
+	if v == nil {
+		panic("NormalResult: unmarshal nil")
+	}
+	return &StatusResult{
+		Data: v,
+	}
+}
+
+func UnwrapResult[V any](v *V) *V {
+	if v == nil {
+		panic("UnwrapResult: unmarshal nil")
+	}
+	return v
+}
+
+func EventsResult[V any](v *V) *V {
+	if v == nil {
+		panic("EventsResult: unmarshal nil")
+	}
+	return v
+}
