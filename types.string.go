@@ -2,7 +2,7 @@ package framework
 
 import (
 	"encoding/json"
-	"github.com/hezof/base/internal/toml"
+	"github.com/hezof/framework/internal/toml"
 	"unsafe"
 )
 

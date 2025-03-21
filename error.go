@@ -2,6 +2,7 @@ package framework
 
 import (
 	"fmt"
+	"github.com/hezof/protojson"
 	"net/http"
 )
 
@@ -88,27 +89,27 @@ func (sr *StatusResult) GetDetails() []string {
 
 var _ Error = (*StatusResult)(nil)
 
-func (sr *StatusResult) DecodeField(r *JsonDecoder, f string) {
+func (sr *StatusResult) DecodeField(r *protojson.JsonDecoder, f string) {
 	switch f {
 	case "code":
-		DecodeUint32(r, &sr.Code)
+		protojson.DecodeUint32(r, &sr.Code)
 	case "name":
-		DecodeString(r, &sr.Name)
+		protojson.DecodeString(r, &sr.Name)
 	case "message":
-		DecodeString(r, &sr.Message)
+		protojson.DecodeString(r, &sr.Message)
 	case "data":
-		DecodeAny(r, sr.Data)
+		protojson.DecodeAny(r, sr.Data)
 	}
 }
 
-func (sr *StatusResult) EncodeField(w *JsonEncoder) {
-	EncodeUint32_WithEmpty(w, "code", sr.Code)
-	EncodeString_OmitEmpty(w, "name", sr.Name)
-	EncodeString_OmitEmpty(w, "message", sr.Message)
-	EncodeAny_OmitEmpty(w, "data", sr.Data)
+func (sr *StatusResult) EncodeField(w *protojson.JsonEncoder) {
+	protojson.EncodeUint32_WithEmpty(w, "code", sr.Code)
+	protojson.EncodeString_OmitEmpty(w, "name", sr.Name)
+	protojson.EncodeString_OmitEmpty(w, "message", sr.Message)
+	protojson.EncodeAny_OmitEmpty(w, "data", sr.Data)
 }
 
-var _ FieldCodec = (*StatusResult)(nil)
+var _ protojson.FieldCodec = (*StatusResult)(nil)
 
 // StatusError 创建StatusResult错误实例. 必须注意status与code的取值范围:
 // - Status 取值范围(0,1024)

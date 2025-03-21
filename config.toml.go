@@ -2,7 +2,7 @@ package framework
 
 import (
 	"bytes"
-	"github.com/hezof/base/internal/toml"
+	"github.com/hezof/framework/internal/toml"
 	"github.com/hezof/log"
 	"os"
 	"path/filepath"

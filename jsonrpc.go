@@ -3,6 +3,7 @@ package framework
 import (
 	"bytes"
 	"fmt"
+	"github.com/hezof/protojson"
 	"io"
 	"net/http"
 )
@@ -96,10 +97,10 @@ func NewJsonRpcClient(endpoint string, config *HttpConfig, header HttpHeader, en
 		config = new(HttpConfig)
 	}
 	if encoder == nil {
-		encoder = EncodeProtoJsonData
+		encoder = protojson.EncodeProtoJsonData
 	}
 	if decoder == nil {
-		decoder = DecodeProtoJsonReader
+		decoder = protojson.DecodeProtoJsonReader
 	}
 
 	return &JsonRpcClient{

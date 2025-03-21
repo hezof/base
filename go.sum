@@ -1,2 +1,2 @@
-github.com/hezof/log v0.0.4 h1:bMJRnNlVEYeWTGFwClPcSBwFjGcV/Dzzhcm1deiZFX4=
-github.com/hezof/log v0.0.4/go.mod h1:I6QLkNg9o2BZr+QYeFom5aZ7D1VkkPkMHP4vI9nxovI=
+github.com/hezof/base v0.0.0-20250320091359-602ad76782e2 h1:4Ds6dxnNSgjmnyCmgG6RlfMeO5nZ6Wm6HER5T7iFTVE=
+github.com/hezof/base v0.0.0-20250320091359-602ad76782e2/go.mod h1:W9VMlDDi7rOcymI9LYtjnPBRU6RU3nPX97sPfzfz4Cw=
