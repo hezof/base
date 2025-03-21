@@ -1,10 +1,10 @@
-module github.com/hezof/framework
+module github.com/hezof/core
 
 go 1.21
 
 require (
-	github.com/hezof/protojson v0.0.0
 	github.com/hezof/log v0.0.0
+	github.com/hezof/protojson v0.0.0
 )
 
 replace (

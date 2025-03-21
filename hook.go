@@ -1,4 +1,4 @@
-package framework
+package core
 
 import "github.com/hezof/log"
 
