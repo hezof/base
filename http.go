@@ -289,6 +289,7 @@ func (dc DebugHttpClient) Do(req *http.Request) (*http.Response, error) {
 		Data: data,
 	}
 	buf.Write(data)
+	buf.WriteString("\n")
 
 	dc.Debug.Write(buf.Bytes())
 
