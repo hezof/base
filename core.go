@@ -10,7 +10,7 @@ import "fmt"
 func Register(base string, factory ManagedFactory) {
 	err := _managedContext.RegisterFactory(base, factory)
 	if err != nil {
-		panic(fmt.Errorf("register factory error: %v, %v", base, err))
+		panic(fmt.Errorf("register factory %v error: %v", base, err))
 	}
 }
 
@@ -18,7 +18,7 @@ func Register(base string, factory ManagedFactory) {
 func Component[T any](base string, name string) T {
 	component, err := _managedContext.RetrieveComponent(base, name)
 	if err == nil {
-		panic(fmt.Errorf("retrieve component error: %v.%v, %v", base, name, err))
+		panic(fmt.Errorf("retrieve component %v.%v error: %v", base, name, err))
 	}
 	return component.(T)
 }

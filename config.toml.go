@@ -136,7 +136,7 @@ func (cp *EnvironConfigPlugin) Data() map[string]any {
 			case strings.HasPrefix(val, "["):
 				arr := make([]any, 0, 4)
 				if err := toml.Unmarshal([]byte(val), &arr); err != nil {
-					log.Error("unmarshal toml array error: %v, %v", key, err)
+					log.Error("unmarshal toml array %v error: %v", key, err)
 					data[key] = val
 				} else {
 					data[key] = arr
@@ -144,7 +144,7 @@ func (cp *EnvironConfigPlugin) Data() map[string]any {
 			case strings.HasPrefix(val, "{"):
 				tbl := make(map[string]any)
 				if err := toml.Unmarshal([]byte(val), &tbl); err != nil {
-					log.Error("unmarshal toml table error: %v, %v", key, err)
+					log.Error("unmarshal toml table %v error: %v", key, err)
 					data[key] = val
 				} else {
 					data[key] = tbl

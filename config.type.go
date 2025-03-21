@@ -592,7 +592,7 @@ func OptiConfigUint64(path string, def uint64) uint64 {
 	}
 	ret, err := AsUint64(val)
 	if err != nil {
-		log.Warn("invalid config %v, %v", path, err)
+		log.Warn("invalid config %v: %v", path, err)
 		return def
 	}
 	return ret
@@ -606,7 +606,7 @@ func OptiConfigFloat32(path string, def float32) float32 {
 	}
 	ret, err := AsFloat32(val)
 	if err != nil {
-		log.Warn("invalid config %v, %v", path, err)
+		log.Warn("invalid config %v: %v", path, err)
 		return def
 	}
 	return ret
@@ -620,7 +620,7 @@ func OptiConfigFloat64(path string, def float64) float64 {
 	}
 	ret, err := AsFloat64(val)
 	if err != nil {
-		log.Warn("invalid config %v, %v", path, err)
+		log.Warn("invalid config %v: %v", path, err)
 		return def
 	}
 	return ret
@@ -637,7 +637,7 @@ func ConfigStruct(path string, structPointer any, tag string) (bool, error) {
 	}
 	kvs, ok := val.(map[string]any)
 	if !ok {
-		return false, fmt.Errorf("invalid type for config %v, expected map[string], but found %T", path, val)
+		return false, fmt.Errorf("invalid config %v: expected map[string], but found %T", path, val)
 	}
 	// 绑定配置无需缓存struct结构
 	err := SimpleStructBinder.MapStruct(kvs, structPointer, tag)

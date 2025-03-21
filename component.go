@@ -268,7 +268,7 @@ func (mc *ManagedContext) Init(configContext *ConfigContext) error {
 		// 初始化后,所有托管组件都必须绑定目标. 否则无法使用!
 		for name, component := range proxy.Components {
 			if component.GetTarget() == nil {
-				return fmt.Errorf("init managed component failed %v.%v, target empty", base, name)
+				return fmt.Errorf("init managed component %v.%v failed: target empty", base, name)
 			}
 		}
 	}
@@ -300,7 +300,7 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 			// 重载新配置
 			newValues, err := AssertManagedConfigValues(base, ct.Config.ID, configContext.GetAll(base))
 			if err != nil {
-				log.Error("reload managed target error %v.%v, %v", base, ct.Config.ID, err)
+				log.Error("reload managed target %v.%v error: %v", base, ct.Config.ID, err)
 				continue _TARGET_
 			}
 			if newValues != nil && reloadPolicy != nil && reloadPolicy(base, ct.Config, newValues) {
@@ -312,7 +312,7 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 				if err != nil {
 					// 恢复旧配置
 					ct.Config.Value = oldValues
-					log.Error("reload managed target error %v.%v, %v", base, ct.Config.ID, err)
+					log.Error("reload managed target %v.%v error: %v", base, ct.Config.ID, err)
 					continue _TARGET_
 				}
 				// 重置组件目标
@@ -322,7 +322,7 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 				// 销毁旧目标,避免内存泄露
 				err = proxy.Destroy(oldTarget)
 				if err != nil {
-					log.Error("destroy managed target error %v.%v, %v, please check memory leaks", base, ct.Config.ID, err)
+					log.Error("destroy managed target %v.%v error: %v, please check memory leaks", base, ct.Config.ID, err)
 				}
 			}
 		}
@@ -370,7 +370,7 @@ func (mc *ManagedContext) Exit(hints ...func(base string, config *ManagedConfig,
 func execHint(hint func(base string, config *ManagedConfig, err error), base string, config *ManagedConfig, err error) {
 	defer func() {
 		if prr := recover(); prr != nil {
-			log.Error("exec hint panic: %v.%v, %v\n%", base, config.ID, err, StackTrace(2, `|`))
+			log.Error("exec hint for %v.%v panic: %v|%v", base, config.ID, err, StackTrace(2, `|`))
 		}
 	}()
 	hint(base, config, err)
