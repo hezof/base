@@ -24,6 +24,13 @@ const (
 	ErrorStatusMask = 1<<ErrorStatusBits - 1
 )
 
+var (
+	ResultCodeField    = `code`
+	ResultNameField    = `name`
+	ResultDataField    = `data`
+	ResultMessageField = `message`
+)
+
 // Error 带状态码的结果
 type Error interface {
 	error
@@ -91,22 +98,22 @@ var _ Error = (*StatusResult)(nil)
 
 func (sr *StatusResult) DecodeField(r *protojson.JsonDecoder, f string) {
 	switch f {
-	case "code":
+	case ResultCodeField:
 		protojson.DecodeUint32(r, &sr.Code)
-	case "name":
+	case ResultNameField:
 		protojson.DecodeString(r, &sr.Name)
-	case "message":
+	case ResultMessageField:
 		protojson.DecodeString(r, &sr.Message)
-	case "data":
+	case ResultDataField:
 		protojson.DecodeAny(r, sr.Data)
 	}
 }
 
 func (sr *StatusResult) EncodeField(w *protojson.JsonEncoder) {
-	protojson.EncodeUint32_WithEmpty(w, "code", sr.Code)
-	protojson.EncodeString_OmitEmpty(w, "name", sr.Name)
-	protojson.EncodeString_OmitEmpty(w, "message", sr.Message)
-	protojson.EncodeAny_OmitEmpty(w, "data", sr.Data)
+	protojson.EncodeUint32_WithEmpty(w, ResultCodeField, sr.Code)
+	protojson.EncodeString_OmitEmpty(w, ResultNameField, sr.Name)
+	protojson.EncodeString_OmitEmpty(w, ResultMessageField, sr.Message)
+	protojson.EncodeAny_OmitEmpty(w, ResultDataField, sr.Data)
 }
 
 var _ protojson.FieldCodec = (*StatusResult)(nil)
