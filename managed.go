@@ -1,4 +1,4 @@
-package base
+package framework
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ func _id(base string, kvs map[string]any) (string, error) {
 	return rt, nil
 }
 
-// [约定] _flat 由于多个文件(glob) + 2种格式("[base]"或"[[base]]"), 需要将配置展开为平面分片.
+// [约定] _flat 由于多个文件(glob) + 2种格式("[framework]"或"[[framework]]"), 需要将配置展开为平面分片.
 func _flat(base string, configGroupSlice []any) ([]map[string]any, error) {
 	// 打平(展开)配置组分片
 	flat := make([]map[string]any, 0, len(configGroupSlice))
@@ -86,7 +86,7 @@ func _names(id string) []string {
 	}
 }
 
-// AssertManagedConfig 解析多个文件base路径的配置, 可能有2种形式: "[base]"或"[[base]]"
+// AssertManagedConfig 解析多个文件base路径的配置, 可能有2种形式: "[framework]"或"[[framework]]"
 func AssertManagedConfig(base string, vals []any) ([]*ManagedConfig, error) {
 
 	// 打平(展开)配置组分片. 多个文件(glob) + 2种格式("[base]"或"[[base]]")

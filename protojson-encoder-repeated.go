@@ -1,4 +1,4 @@
-package base
+package framework
 
 /*************************************
 	bool类型: EncodeBoolRepeated_<empty>

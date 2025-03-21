@@ -1,4 +1,4 @@
-package base
+package framework
 
 import (
 	"encoding/base64"

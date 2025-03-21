@@ -1,4 +1,4 @@
-module github.com/hezof/base
+module github.com/hezof/framework
 
 go 1.21
 

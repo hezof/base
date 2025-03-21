@@ -1,4 +1,4 @@
-package base
+package framework
 
 func DecodeBoolRepeated(r *JsonDecoder, p *[]bool) {
 	switch r.token {

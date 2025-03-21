@@ -1,4 +1,4 @@
-package base
+package framework
 
 func DecodeBoolMap(r *JsonDecoder, p *map[string]bool) {
 	switch r.token {
