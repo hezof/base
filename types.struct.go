@@ -435,6 +435,6 @@ func (sb StructBinder) AdaptValue(org interface{}, dstTyp reflect.Type, dstVal *
 	return false, fmt.Errorf("can't convert from type %T to %v", org, dstTyp)
 }
 
-func MapStruct(org map[string]interface{}, dst interface{}, tag string) error {
+func MapStruct(org map[string]any, dst any, tag string) error {
 	return CachedStructBinder.MapStruct(org, dst, tag)
 }

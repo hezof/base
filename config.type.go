@@ -625,3 +625,24 @@ func OptiConfigFloat64(path string, def float64) float64 {
 	}
 	return ret
 }
+
+/**************************************************
+ * struct绑定
+ **************************************************/
+
+func ConfigStruct(path string, structPointer any, tag string) (bool, error) {
+	val, ok := _configContext.GetFirst(path)
+	if !ok {
+		return false, nil
+	}
+	kvs, ok := val.(map[string]any)
+	if !ok {
+		return false, fmt.Errorf("invalid type for config %v, expected map[string], but found %T", path, val)
+	}
+	// 绑定配置无需缓存struct结构
+	err := SimpleStructBinder.MapStruct(kvs, structPointer, tag)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
