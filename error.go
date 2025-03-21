@@ -24,6 +24,9 @@ const (
 	ErrorStatusMask = 1<<ErrorStatusBits - 1
 )
 
+/*
+返回的消息字段名称, 支持在线修改!
+*/
 var (
 	ResultCodeField    = `code`
 	ResultNameField    = `name`
