@@ -1,4 +1,4 @@
-package kit
+package base
 
 import (
 	"cmp"
