@@ -29,25 +29,25 @@ func InitConfigContext(datas ...[]byte) error {
  * 组件托管初始化
  *************************************************/
 
-func OverrideFactory(base string, factory ManagedFactory) {
-	_managedContext.OverrideFactory(base, factory)
-}
-
-// RegisterFactory 注册组件工厂, 重复注册会panic!
-func RegisterFactory(base string, factory ManagedFactory) {
-	err := _managedContext.RegisterFactory(base, factory)
-	if err != nil {
-		panic(fmt.Errorf("register factory %v error: %v", base, err))
-	}
-}
-
-// RetrieveComponent 断言组件实例, 若无base工厂会panic!
-func RetrieveComponent[T any](base string, name string) T {
+// Component 断言组件实例, 若无base工厂会panic!
+func Component[T any](base string, name string) T {
 	component, err := _managedContext.RetrieveComponent(base, name)
 	if err != nil {
 		panic(fmt.Errorf("retrieve component %v.%v error: %v", base, name, err))
 	}
 	return component.(T)
+}
+
+func OverrideManagedFactory(base string, factory ManagedFactory) {
+	_managedContext.OverrideFactory(base, factory)
+}
+
+// RegisterManagedFactory 注册组件工厂, 重复注册会panic!
+func RegisterManagedFactory(base string, factory ManagedFactory) {
+	err := _managedContext.RegisterFactory(base, factory)
+	if err != nil {
+		panic(fmt.Errorf("register factory %v error: %v", base, err))
+	}
 }
 
 func InitManagedContext() error {
