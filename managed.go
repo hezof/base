@@ -196,7 +196,7 @@ type ManagedContext struct {
 	Indexes      []string                        // 注册顺序, 决定Init()/Exit()的组件顺序
 }
 
-func (mc *ManagedContext) RegisterFactory(base string, factory ManagedFactory) error {
+func (mc *ManagedContext) Register(base string, factory ManagedFactory) error {
 
 	log.Info("register managed factory %v", base)
 
@@ -216,7 +216,7 @@ func (mc *ManagedContext) RegisterFactory(base string, factory ManagedFactory) e
 	return nil
 }
 
-func (mc *ManagedContext) RetrieveComponent(base string, name string) (ManagedComponent, error) {
+func (mc *ManagedContext) Retrieve(base string, name string) (ManagedComponent, error) {
 	mc.RLock()
 	defer mc.RUnlock()
 	// 返回代理工厂
@@ -275,7 +275,7 @@ func (mc *ManagedContext) Init(configContext *ConfigContext) error {
 	return nil
 }
 
-func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func(base string, config *ManagedConfig, newValues map[string]any) bool) {
+func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func(base string, config *ManagedConfig, newValues map[string]any) bool) error {
 
 	log.Info("reload managed context...")
 
@@ -293,15 +293,13 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 
 	for _, base := range mc.Indexes {
 		proxy := mc.Proxies[base]
-	_TARGET_:
 		for _, ct := range proxy.Targets {
 			oldValues := ct.Config.Value
 			oldTarget := ct.Target
 			// 重载新配置
 			newValues, err := AssertManagedConfigValues(base, ct.Config.ID, configContext.GetAll(base))
 			if err != nil {
-				log.Error("reload managed target %v.%v error: %v", base, ct.Config.ID, err)
-				continue _TARGET_
+				return err
 			}
 			if newValues != nil && reloadPolicy != nil && reloadPolicy(base, ct.Config, newValues) {
 
@@ -312,8 +310,7 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 				if err != nil {
 					// 恢复旧配置
 					ct.Config.Value = oldValues
-					log.Error("reload managed target %v.%v error: %v", base, ct.Config.ID, err)
-					continue _TARGET_
+					return err
 				}
 				// 重置组件目标
 				for _, name := range ct.Config.Names {
@@ -327,14 +324,7 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 			}
 		}
 	}
-}
-
-func _path(base, _id string) string {
-	// 全局惟一实例
-	if _id == "" {
-		return base
-	}
-	return base + "." + _id
+	return nil
 }
 
 func (mc *ManagedContext) Exit(hints ...func(base string, config *ManagedConfig, err error)) {

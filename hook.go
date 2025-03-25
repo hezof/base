@@ -22,37 +22,40 @@ var joinPointNames = map[JoinPoint]string{
 	AfterExit:    "after exit",
 }
 
-type Hook struct {
+type hook struct {
 	Join JoinPoint
 	Name string
 	Call func(config *ConfigContext, managed *ManagedContext)
 }
 
-func (h Hook) Exec(config *ConfigContext, managed *ManagedContext) {
+func (h hook) Exec(config *ConfigContext, managed *ManagedContext) {
 	defer func() {
 		if prr := recover(); prr != nil {
-			log.Error("exec hook  %v panic: %v|%v", h.Name, prr, StackTrace(2, `|`))
+			log.Error("exec hook %v %v panic: %v|%v", joinPointNames[h.Join], h.Name, prr, StackTrace(2, `|`))
 		}
 	}()
 	h.Call(config, managed)
 }
 
-var _hooks = make([]*Hook, 0, 4)
+type Hooks struct {
+	value []*hook
+}
 
-func JoinHook(join JoinPoint, name string, call func(config *ConfigContext, managed *ManagedContext)) {
-	log.Info("join hook %v, %v", joinPointNames[join], name)
-	_hooks = append(_hooks, &Hook{
+func (h *Hooks) Join(join JoinPoint, name string, call func(config *ConfigContext, managed *ManagedContext)) {
+	h.value = append(h.value, &hook{
 		Join: join,
 		Name: name,
 		Call: call,
 	})
 }
 
-func ExecHook(join JoinPoint, config *ConfigContext, managed *ManagedContext) {
-	for _, hook := range _hooks {
+func (h *Hooks) Exec(join JoinPoint, config *ConfigContext, managed *ManagedContext) {
+	for _, hook := range h.value {
 		if hook.Join == join {
-			log.Info("exec hook %v, %v", joinPointNames[join], hook.Name)
+			log.Info("exec hook %v %v", joinPointNames[join], hook.Name)
 			hook.Exec(config, managed)
 		}
 	}
 }
+
+var _hooks = new(Hooks)

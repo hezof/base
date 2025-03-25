@@ -1,29 +1,12 @@
 package core
 
 import (
-	"bytes"
 	"github.com/hezof/core/internal/toml"
-	"github.com/hezof/log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"text/template"
 )
-
-// 默认配置对象
-var (
-	_configContext = &ConfigContext{Plugin: _configPlugin}
-	_configPlugin  = new(EnvironConfigPlugin)
-)
-
-func SetConfigPlugin(plugin ConfigPlugin) {
-	if plugin != nil {
-		_configContext.Plugin = plugin
-	} else {
-		_configContext.Plugin = _configPlugin
-	}
-}
 
 /********************************************
  * 配置及插件
@@ -38,26 +21,14 @@ type ConfigPlugin interface {
 // 支持多配置文件, 各个配置文件的数据独立存储,不做合并. 所以values是个slice!
 type ConfigContext struct {
 	sync.RWMutex
-	Plugin ConfigPlugin
 	Values []map[string]any
 }
 
-func (c *ConfigContext) SetTomlData(datas ...[]byte) (err error) {
+func (c *ConfigContext) SetData(datas ...[]byte) (err error) {
 	c.Lock()
 	defer c.Unlock()
 
-	/*
-		设置流程: 遍历多配置文件, 各配置数据独立存储, 不做合并!
-		1. 调用配置插件(如果存在的话),例如模板引擎(text/template),或者其他...
-		2. 解码配置(固定toml), 其他数据请在第1步借助插件替换为toml. 例如: MarshalConfig(...)
-	*/
-
 	for _, data := range datas {
-		if c.Plugin != nil {
-			if data, err = c.Plugin.Exec(data); err != nil {
-				return err
-			}
-		}
 		value := make(map[string]any)
 		if err = toml.Unmarshal(data, &value); err != nil {
 			return err
@@ -114,63 +85,6 @@ func (c *ConfigContext) GetAll(path string) []any {
 		}
 	}
 	return all
-}
-
-// EnvironConfigPlugin 内置配置插件(environment + text template)
-type EnvironConfigPlugin struct{}
-
-func (cp *EnvironConfigPlugin) Data() map[string]any {
-	/*
-		数据逻辑: 读取所有环境变量作为数据, 默认所有值都是string, 但支持toml的array([...])与table({...})
-	*/
-	data := make(map[string]any)
-	for _, env := range os.Environ() {
-		pos := strings.IndexByte(env, '=')
-		if pos == -1 {
-			data[env] = ""
-		} else {
-			key := strings.TrimSpace(env[:pos])
-			val := strings.TrimSpace(env[pos+1:])
-			// 支持toml的Array与Table
-			switch {
-			case strings.HasPrefix(val, "["):
-				arr := make([]any, 0, 4)
-				if err := toml.Unmarshal([]byte(val), &arr); err != nil {
-					log.Error("unmarshal toml array %v error: %v", key, err)
-					data[key] = val
-				} else {
-					data[key] = arr
-				}
-			case strings.HasPrefix(val, "{"):
-				tbl := make(map[string]any)
-				if err := toml.Unmarshal([]byte(val), &tbl); err != nil {
-					log.Error("unmarshal toml table %v error: %v", key, err)
-					data[key] = val
-				} else {
-					data[key] = tbl
-				}
-			default:
-				data[key] = val
-			}
-		}
-	}
-	return data
-}
-
-func (cp *EnvironConfigPlugin) Exec(data []byte) ([]byte, error) {
-	/*
-		默认EnvironConfigPlugin插件使用text/template模板引擎, 其它引擎请请用SetConfigPlugin()替换
-	*/
-	tpl, err := template.New("").Parse(string(data))
-	if err != nil {
-		return nil, err
-	}
-	buf := bytes.NewBuffer(make([]byte, 0, 2048))
-	err = tpl.Execute(buf, cp.Data())
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }
 
 /********************************************
@@ -257,3 +171,9 @@ func ExtractConfig(val map[string]any, path string) (any, bool) {
 		path = path[pos+1:]
 	}
 }
+
+// 默认配置对象
+var (
+	_configContext         = new(ConfigContext)
+	_environConfigTemplate = new(EnvironConfigTemplate)
+)

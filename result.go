@@ -2,8 +2,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/hezof/protojson"
-	"net/http"
 )
 
 /*
@@ -99,28 +97,6 @@ func (sr *StatusResult) GetDetails() []string {
 
 var _ Error = (*StatusResult)(nil)
 
-func (sr *StatusResult) DecodeField(r *protojson.JsonDecoder, f string) {
-	switch f {
-	case ResultCodeField:
-		protojson.DecodeUint32(r, &sr.Code)
-	case ResultNameField:
-		protojson.DecodeString(r, &sr.Name)
-	case ResultMessageField:
-		protojson.DecodeString(r, &sr.Message)
-	case ResultDataField:
-		protojson.DecodeAny(r, sr.Data)
-	}
-}
-
-func (sr *StatusResult) EncodeField(w *protojson.JsonEncoder) {
-	protojson.EncodeUint32_WithEmpty(w, ResultCodeField, sr.Code)
-	protojson.EncodeString_OmitEmpty(w, ResultNameField, sr.Name)
-	protojson.EncodeString_OmitEmpty(w, ResultMessageField, sr.Message)
-	protojson.EncodeAny_OmitEmpty(w, ResultDataField, sr.Data)
-}
-
-var _ protojson.FieldCodec = (*StatusResult)(nil)
-
 // StatusError 创建StatusResult错误实例. 必须注意status与code的取值范围:
 // - Status 取值范围(0,1024)
 // - Code 取值范围(0,4194304)
@@ -137,31 +113,5 @@ func StatusError(status uint32, code uint32, message string, details ...string) 
 		Code:    code,
 		Message: message,
 		Details: details,
-	}
-}
-
-// StatusErrorFrom 定义统一的error转换为*Result规则
-func StatusErrorFrom(err error) *StatusResult {
-
-	// 内部错误
-	if val, ok := err.(*StatusResult); ok {
-		return val
-	}
-
-	// 接口错误
-	if val, ok := err.(Error); ok {
-		return &StatusResult{
-			Status:  val.GetStatus(),
-			Code:    val.GetCode(),
-			Message: val.GetMessage(),
-			Details: val.GetDetails(),
-		}
-	}
-
-	// 其他错误
-	return &StatusResult{
-		Status:  http.StatusInternalServerError,
-		Code:    2, // Grpc Unknown是2
-		Message: err.Error(),
 	}
 }
