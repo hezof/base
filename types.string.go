@@ -2,7 +2,7 @@ package kit
 
 import (
 	"encoding/json"
-	"github.com/hezof/ioc/internal/toml"
+	"github.com/hezof/base/internal/toml"
 	"unsafe"
 )
 

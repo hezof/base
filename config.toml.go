@@ -2,7 +2,7 @@ package kit
 
 import (
 	"bytes"
-	"github.com/hezof/ioc/internal/toml"
+	"github.com/hezof/base/internal/toml"
 	"github.com/hezof/log"
 	"os"
 	"path/filepath"
