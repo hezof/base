@@ -57,9 +57,13 @@ func Init() {
 }
 
 func InitData(datas ...[]byte) {
-	// 0. 初始配置
+	// 0. 初始配置及内部组件
 	if err := _configContext.SetData(datas...); err != nil {
 		panic(fmt.Errorf("init config context error: %v", err))
+	}
+
+	if err := InitLogger(); err != nil {
+		panic(fmt.Errorf("init logger error: %v", err))
 	}
 
 	// 1. 回调钩子
@@ -91,7 +95,7 @@ func Reload(reloadPolicy func(base string, config *ManagedConfig, newValues map[
 }
 
 func ReloadData(reloadPolicy func(base string, config *ManagedConfig, newValues map[string]any) bool, datas ...[]byte) error {
-	// 0. 重载配置
+	// 0. 重载配置. 内部组件不重载.
 	if err := _configContext.SetData(datas...); err != nil {
 		return fmt.Errorf("reload config context error: %v", err)
 	}
