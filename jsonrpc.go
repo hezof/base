@@ -3,6 +3,7 @@ package clients
 import (
 	"bytes"
 	"fmt"
+	"github.com/hezof/core"
 	"github.com/hezof/protojson"
 	"io"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 
 type JsonMarshal func(v any) ([]byte, error)
 type JsonUnmarshal func(r io.Reader, v any) error
+
+type HttpConfig = core.HttpConfig
 
 // HttpHeader http头部
 type HttpHeader interface {
@@ -19,7 +22,7 @@ type HttpHeader interface {
 // JsonRpcClient rpc客户端
 type JsonRpcClient struct {
 	endpoint string
-	client   HttpClient
+	client   core.HttpClient
 	header   HttpHeader
 	encoder  JsonMarshal
 	decoder  JsonUnmarshal
@@ -78,7 +81,7 @@ func (c *JsonRpcClient) Do(method string, uri string, req any, rsp any, status .
 	if err != nil {
 		return err
 	}
-	defer DiscardResponse(hrsp)
+	defer core.DiscardResponse(hrsp)
 
 	if len(status) > 0 {
 		if !contains(hrsp.StatusCode, status) {
@@ -94,7 +97,7 @@ func (c *JsonRpcClient) Do(method string, uri string, req any, rsp any, status .
 // NewJsonRpcClient 创建rpc客户端
 func NewJsonRpcClient(endpoint string, config *HttpConfig, header HttpHeader, encoder JsonMarshal, decoder JsonUnmarshal) *JsonRpcClient {
 	if config == nil {
-		config = new(HttpConfig)
+		config = new(core.HttpConfig)
 	}
 	if encoder == nil {
 		encoder = protojson.EncodeProtoJsonData
@@ -105,7 +108,7 @@ func NewJsonRpcClient(endpoint string, config *HttpConfig, header HttpHeader, en
 
 	return &JsonRpcClient{
 		endpoint: endpoint,
-		client:   NewHttpClient(config),
+		client:   core.NewHttpClient(config),
 		header:   header,
 		encoder:  encoder,
 		decoder:  decoder,
