@@ -17,14 +17,6 @@ var (
 	_configPlugin  = new(EnvironConfigPlugin)
 )
 
-func SetConfigPlugin(plugin ConfigPlugin) {
-	if plugin != nil {
-		_configContext.Plugin = plugin
-	} else {
-		_configContext.Plugin = _configPlugin
-	}
-}
-
 /********************************************
  * 配置及插件
  ********************************************/
@@ -38,11 +30,10 @@ type ConfigPlugin interface {
 // 支持多配置文件, 各个配置文件的数据独立存储,不做合并. 所以values是个slice!
 type ConfigContext struct {
 	sync.RWMutex
-	Plugin ConfigPlugin
 	Values []map[string]any
 }
 
-func (c *ConfigContext) SetTomlData(datas ...[]byte) (err error) {
+func (c *ConfigContext) SetData(datas ...[]byte) (err error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -53,11 +44,6 @@ func (c *ConfigContext) SetTomlData(datas ...[]byte) (err error) {
 	*/
 
 	for _, data := range datas {
-		if c.Plugin != nil {
-			if data, err = c.Plugin.Exec(data); err != nil {
-				return err
-			}
-		}
 		value := make(map[string]any)
 		if err = toml.Unmarshal(data, &value); err != nil {
 			return err

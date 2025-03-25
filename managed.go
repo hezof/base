@@ -8,27 +8,6 @@ import (
 )
 
 /*************************************************
- * 容器接口
- *************************************************/
-
-// Register 注册组件工厂, 重复注册会panic!
-func Register(base string, factory ManagedFactory) {
-	err := _managedContext.RegisterFactory(base, factory)
-	if err != nil {
-		panic(fmt.Errorf("register factory %v error: %v", base, err))
-	}
-}
-
-// Component 断言组件实例, 若无base工厂会panic!
-func Component[T any](base string, name string) T {
-	component, err := _managedContext.RetrieveComponent(base, name)
-	if err != nil {
-		panic(fmt.Errorf("retrieve component %v.%v error: %v", base, name, err))
-	}
-	return component.(T)
-}
-
-/*************************************************
  * 容器实现
  *************************************************/
 
@@ -221,6 +200,19 @@ type ManagedContext struct {
 	Indexes      []string                        // 注册顺序, 决定Init()/Exit()的组件顺序
 }
 
+func (mc *ManagedContext) OverrideFactory(base string, factory ManagedFactory) {
+	log.Info("override managed factory %v", base)
+
+	mc.Lock()
+	defer mc.Unlock()
+
+	mc.Proxies[base] = &ManagedFactoryProxy{
+		factory:    factory,
+		Components: make(map[string]ManagedComponent),
+		Targets:    make([]*ManagedConfigTarget, 0, 4),
+	}
+}
+
 func (mc *ManagedContext) RegisterFactory(base string, factory ManagedFactory) error {
 
 	log.Info("register managed factory %v", base)
@@ -352,14 +344,6 @@ func (mc *ManagedContext) Reload(configContext *ConfigContext, reloadPolicy func
 			}
 		}
 	}
-}
-
-func _path(base, _id string) string {
-	// 全局惟一实例
-	if _id == "" {
-		return base
-	}
-	return base + "." + _id
 }
 
 func (mc *ManagedContext) Exit(hints ...func(base string, config *ManagedConfig, err error)) {
