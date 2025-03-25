@@ -8,14 +8,12 @@ import (
 	"sync"
 )
 
-/********************************************
- * 配置及插件
- ********************************************/
+// 默认配置对象
+var _configContext = new(ConfigContext)
 
-// ConfigPlugin 配置处理器(模板,属性)
-type ConfigPlugin interface {
-	Exec(data []byte) ([]byte, error)
-}
+/********************************************
+ * 配置上下文
+ ********************************************/
 
 // ConfigContext 配置结构
 // 支持多配置文件, 各个配置文件的数据独立存储,不做合并. 所以values是个slice!
@@ -171,9 +169,3 @@ func ExtractConfig(val map[string]any, path string) (any, bool) {
 		path = path[pos+1:]
 	}
 }
-
-// 默认配置对象
-var (
-	_configContext         = new(ConfigContext)
-	_environConfigTemplate = new(EnvironConfigTemplate)
-)

@@ -7,6 +7,12 @@ import (
 	"sync"
 )
 
+// _managed 内部托管容器
+var _managedContext = &ManagedContext{
+	Proxies: make(map[string]*ManagedFactoryProxy),
+	Indexes: make([]string, 0, 8),
+}
+
 // ManagedTarget 托管目标接口
 type ManagedTarget = any
 
@@ -364,10 +370,4 @@ func execHint(hint func(base string, config *ManagedConfig, err error), base str
 		}
 	}()
 	hint(base, config, err)
-}
-
-// _managed 内部托管容器
-var _managedContext = &ManagedContext{
-	Proxies: make(map[string]*ManagedFactoryProxy),
-	Indexes: make([]string, 0, 8),
 }

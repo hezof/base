@@ -9,9 +9,7 @@ import (
 	"text/template"
 )
 
-var (
-	_configTemplate ConfigTemplate = new(EnvironConfigTemplate)
-)
+var _configTemplate ConfigTemplate = new(EnvironConfigTemplate)
 
 type ConfigTemplate interface {
 	Exec(data []byte) ([]byte, error)
